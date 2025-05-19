@@ -96,4 +96,10 @@ public class RepositorioPersonaTXT : IRepositorioPersona
         }
         return resultado;
     }
+
+    public Persona? GetPersona(int id)
+    {
+        var personas = ListarPersonas();
+        return personas.FirstOrDefault(p => p.Id == id);
+    }
 }

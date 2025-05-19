@@ -7,4 +7,6 @@ public interface IRepositorioEventoDeportivo
     void ModificarEventoDeportivo(EventoDeportivo eventoDeportivo);
     List<EventoDeportivo> ListarEventosDeportivos();
 
+    EventoDeportivo? GetEventoDeportivo(int id);
+
 }

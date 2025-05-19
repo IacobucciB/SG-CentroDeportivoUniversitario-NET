@@ -103,4 +103,10 @@ public class RepositorioEventoDeportivoTXT : IRepositorioEventoDeportivo
         return resultado;
 
     }
+
+    public EventoDeportivo? GetEventoDeportivo(int id)
+    {
+        var eventos = ListarEventosDeportivos();
+        return eventos.FirstOrDefault(e => e.Id == id);
+    }
 }
