@@ -1,13 +1,29 @@
-﻿namespace CentroEventos.Aplicacion.Validadores
+﻿namespace CentroEventos.Aplicacion;
+
+public class ReservaValidador
 {
-    public class ValidadorReserva
+    public bool Validar(Reserva reserva, out string mensajeError)
+    {
+        mensajeError = ""; 
+
+
+
+        return (mensajeError == "");
+    }
+}
+
+
+/*
+namespace CentroEventos.Aplicacion.Validadores
+{
+    public class ReservaValidador
     {
         private readonly IRepositorioPersona _repoPersona;
         private readonly IRepositorioEventoDeportivo _repoEvento;
         private readonly IRepositorioReserva _repoReserva;
 
         //Son los constructores
-        public ValidadorReserva(
+        public ReservaValidador(
             IRepositorioPersona repoPersona,
             IRepositorioEventoDeportivo repoEvento,
             IRepositorioReserva repoReserva)
@@ -17,8 +33,9 @@
             _repoReserva = repoReserva;
         }
 
-        public void Validar(Reserva reserva)
+        public bool Validar(Reserva reserva)
         {
+
             // 1. Validar que exista la persona (tengo que ver que hizo lauti)
             var persona = _repoPersona.ObtenerPorId(reserva.PersonaId);
             if (persona == null)
@@ -37,6 +54,11 @@
             var reservas = _repoReserva.ListarReservasPorEvento(reserva.EventoDeportivoId);
             if (reservas.Count >= evento.CupoMaximo)
                 throw new CupoExcedidoException("No hay cupo disponible para este evento.");
+            
+
+
+return true;
         }
     }
 }
+*/
