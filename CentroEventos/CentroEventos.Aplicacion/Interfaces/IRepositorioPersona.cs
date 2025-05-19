@@ -2,5 +2,9 @@ namespace CentroEventos.Aplicacion;
 
 public interface IRepositorioPersona
 {
-    // TO DO
+    void AgregarPersona(Persona persona);
+    void ModificarPersona(Persona persona);
+    void EliminarPersona(int id);
+    
+    List<Persona> ListarPersonas();
 }
