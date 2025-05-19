@@ -1,22 +1,22 @@
 namespace CentroEventos.Aplicacion;
 
+public enum EstadoAsistencia
+{
+    Pendiente,
+    Presente,
+    Ausente
+}
+
 public class Reserva
 {
     public int Id { get; set; }
     public int PersonaId { get; set; }
     public int EventoDeportivoId { get; set; }
     public DateTime FechaAltaReserva { get; set; }
-    public Estado EstadoAsistencia { get; set; }
-
-    public enum Estado
-    {
-        Pendiente,
-        Presente,
-        Ausente
-    }
+    public EstadoAsistencia EstadoAsistencia { get; set; }
 
     public override string ToString()
     {
-        return $"Reserva: {Id}, {PersonaId}, {EventoDeportivoId},  {FechaAltaReserva:yyyy-MM-dd HH:mm:ss}, Estado: {EstadoAsistencia}";
+        return $"Reserva Id: {Id}, PersonaId: {PersonaId}, EventoId: {EventoDeportivoId}, Fecha: {FechaAltaReserva}, Estado: {EstadoAsistencia}";
     }
 }

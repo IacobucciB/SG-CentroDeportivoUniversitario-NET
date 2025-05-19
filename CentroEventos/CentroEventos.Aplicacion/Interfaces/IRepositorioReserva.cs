@@ -2,11 +2,14 @@ namespace CentroEventos.Aplicacion;
 
 public interface IRepositorioReserva
 {
-   void Agregar(Reserva reserva);
-    void Modificar(Reserva reserva);
-    void Eliminar(int id);
-    //Reserva? ObtenerPorId(int id);
-    List<Reserva> ListarTodas();
-    List<Reserva> ObtenerPorEvento(int eventoId);
-    bool ExisteReservaDePersonaEnEvento(int personaId, int eventoId);
+   public interface IRepositorioReserva
+    {
+        void AltaReserva(Reserva reserva);
+        void BajaReserva(int id);
+        void ModificarReserva(Reserva reserva);
+        List<Reserva> ListarReservas();
+        List<Reserva> ListarReservasPorEvento(int eventoId);
+        bool ExisteReserva(int personaId, int eventoId);
+        Reserva? ObtenerReservaPorId(int id);
+    }
 }
