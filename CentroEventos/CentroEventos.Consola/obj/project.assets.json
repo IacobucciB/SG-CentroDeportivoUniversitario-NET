@@ -1,11 +1,49 @@
 {
   "version": 3,
   "targets": {
-    "net8.0": {}
+    "net8.0": {
+      "CentroEventos.Aplicacion/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "compile": {
+          "bin/placeholder/CentroEventos.Aplicacion.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CentroEventos.Aplicacion.dll": {}
+        }
+      },
+      "CentroEventos.Repositorios/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v8.0",
+        "dependencies": {
+          "CentroEventos.Aplicacion": "1.0.0"
+        },
+        "compile": {
+          "bin/placeholder/CentroEventos.Repositorios.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/CentroEventos.Repositorios.dll": {}
+        }
+      }
+    }
   },
-  "libraries": {},
+  "libraries": {
+    "CentroEventos.Aplicacion/1.0.0": {
+      "type": "project",
+      "path": "../CentroEventos.Aplicacion/CentroEventos.Aplicacion.csproj",
+      "msbuildProject": "../CentroEventos.Aplicacion/CentroEventos.Aplicacion.csproj"
+    },
+    "CentroEventos.Repositorios/1.0.0": {
+      "type": "project",
+      "path": "../CentroEventos.Repositorios/CentroEventos.Repositorios.csproj",
+      "msbuildProject": "../CentroEventos.Repositorios/CentroEventos.Repositorios.csproj"
+    }
+  },
   "projectFileDependencyGroups": {
-    "net8.0": []
+    "net8.0": [
+      "CentroEventos.Aplicacion >= 1.0.0",
+      "CentroEventos.Repositorios >= 1.0.0"
+    ]
   },
   "packageFolders": {
     "C:\\Users\\link0\\.nuget\\packages\\": {}
@@ -31,7 +69,14 @@
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj": {
+              "projectPath": "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj"
+            },
+            "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Repositorios\\CentroEventos.Repositorios.csproj": {
+              "projectPath": "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Repositorios\\CentroEventos.Repositorios.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
