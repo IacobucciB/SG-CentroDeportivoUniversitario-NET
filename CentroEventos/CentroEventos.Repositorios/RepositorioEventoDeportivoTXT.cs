@@ -5,8 +5,26 @@ using CentroEventos.Aplicacion;
 public class RepositorioEventoDeportivoTXT : IRepositorioEventoDeportivo
 {
     readonly string _nombreArch = "eventoDeportivo.txt";
+
+    private int ObtenerNuevoId()
+    {
+        int maxId = 0;
+        if (File.Exists(_nombreArch))
+            using (var sr = new StreamReader(_nombreArch))
+                while (!sr.EndOfStream)
+                {
+                    if (int.TryParse(sr.ReadLine(), out int id) && id > maxId) maxId = id;
+                    for (int i = 0; i < 6 && !sr.EndOfStream; i++) sr.ReadLine();
+                }
+        return maxId + 1;
+    }
+
     public void AltaEventoDeportivo(EventoDeportivo eventoDeportivo)
     {
+        if (eventoDeportivo.Id == 0)
+        {
+            eventoDeportivo.Id = ObtenerNuevoId();
+        }
         using var sw = new StreamWriter(_nombreArch, true);
         sw.WriteLine(eventoDeportivo.Id);
         sw.WriteLine(eventoDeportivo.Nombre);
@@ -35,7 +53,7 @@ public class RepositorioEventoDeportivoTXT : IRepositorioEventoDeportivo
         }
     }
     public void ModificarEventoDeportivo(EventoDeportivo eventoDeportivo)
-    { 
+    {
         var eventos = ListarEventosDeportivos();
         using var sw = new StreamWriter(_nombreArch);
         foreach (var evento in eventos)
