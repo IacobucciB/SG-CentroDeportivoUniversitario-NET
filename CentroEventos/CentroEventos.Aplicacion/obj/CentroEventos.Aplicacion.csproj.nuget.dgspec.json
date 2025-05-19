@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj": {}
+    "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj": {
+    "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj",
+        "projectUniqueName": "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj",
         "projectName": "CentroEventos.Aplicacion",
-        "projectPath": "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj",
-        "packagesPath": "C:\\Users\\Neme\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\obj\\",
+        "projectPath": "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj",
+        "packagesPath": "C:\\Users\\link0\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\link0\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\Neme\\AppData\\Roaming\\NuGet\\NuGet.Config"
+          "C:\\Users\\link0\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
@@ -58,7 +58,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.409/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.407/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

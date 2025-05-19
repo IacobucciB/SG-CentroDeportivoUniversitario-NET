@@ -1,0 +1,14 @@
+1
+Fútbol 5
+Torneo de fútbol 5 universitario
+20/5/2025 01:03:31
+2
+10
+1
+2
+Básquet
+Encuentro amistoso de básquet
+21/5/2025 01:03:31
+1,5
+12
+2
