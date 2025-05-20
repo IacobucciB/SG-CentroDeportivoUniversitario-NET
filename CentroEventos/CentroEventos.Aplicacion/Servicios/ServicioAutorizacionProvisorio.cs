@@ -1,8 +1,8 @@
 namespace CentroEventos.Aplicacion;
 
-/*
 
-public class ServicioAutorizacionProvisorio(AutorizacionException autorizacion) : IServicioAutorizacion
+
+public class ServicioAutorizacionProvisorio(FalloAutorizacionException autorizacion) : IServicioAutorizacion
 {
     public bool PoseeElPermiso(int IdUsuario, Permiso permiso) {
         try
@@ -18,4 +18,3 @@ public class ServicioAutorizacionProvisorio(AutorizacionException autorizacion) 
     }
 }
 
-*/
