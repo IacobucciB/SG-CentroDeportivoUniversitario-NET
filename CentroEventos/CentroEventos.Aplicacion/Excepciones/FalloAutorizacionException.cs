@@ -1,7 +1,10 @@
 namespace CentroEventos.Aplicacion;
 
-public class FalloAutorizacionException
+public class FalloAutorizacionException : Exception
 {
+    public FalloAutorizacionException(string message) : base(message)
+    {
+    }
     public void AutorizarExcepciones(int IdUsuario)
     {
         if (IdUsuario == 0)
