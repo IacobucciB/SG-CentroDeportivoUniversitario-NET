@@ -9,6 +9,5 @@ public interface IRepositorioReserva
     List<Reserva> ListarReservasPorEvento(int eventoId);
     bool ExisteReserva(int personaId, int eventoId);
     Reserva? ObtenerReservaPorId(int id);
-
-    int eventoid(int eventioId);
+    
 }

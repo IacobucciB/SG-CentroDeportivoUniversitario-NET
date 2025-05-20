@@ -95,12 +95,16 @@ namespace CentroEventos.Repositorios
                 sw.WriteLine(r.EstadoAsistencia);
             }
         }
-
-        public int eventoid(int id)
+        public List<Reserva> ListarReservasPorEvento(int eventoId)
         {
-            var reservas = ListarReservas(); // Usa la función que lee todas las reservas
-            return reservas.FirstOrDefault(r => r.Id == id);
-
+            return ListarReservas()
+                .Where(r => r.EventoDeportivoId == eventoId)
+                .ToList();
+        }
+        public bool ExisteReserva(int personaId, int eventoId)
+        {
+            return ListarReservas()
+            .Any(r => r.PersonaId == personaId && r.EventoDeportivoId == eventoId);
         }
     }
 }
