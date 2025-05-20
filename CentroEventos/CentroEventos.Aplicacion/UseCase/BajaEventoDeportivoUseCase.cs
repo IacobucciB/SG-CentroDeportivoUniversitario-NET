@@ -1,9 +1,21 @@
 namespace CentroEventos.Aplicacion;
 
-public class BajaEventoDeportivoUseCase(IRepositorioEventoDeportivo repositorioEventoDeportivo)
+public class BajaEventoDeportivoUseCase(
+    IRepositorioEventoDeportivo repositorioEventoDeportivo,
+    IServicioAutorizacion servicioAutorizacion)
 {
-    public void Ejecutar(int id)
+    public void Ejecutar(int idEvento, int idUsuario)
     {
-        repositorioEventoDeportivo.BajaEventoDeportivo(id);
+        // 1. Autorización
+        if (!servicioAutorizacion.PoseeElPermiso(idUsuario, Permiso.EventoBaja))
+            throw new FalloAutorizacionException("No tiene permiso para realizar esta acción.");
+
+        // 2. Validar existencia del evento
+        var evento = repositorioEventoDeportivo.GetEventoDeportivo(idEvento);
+        if (evento == null)
+            throw new EntidadNotFoundException("El evento deportivo no existe.");
+
+        // 3. Eliminar evento
+        repositorioEventoDeportivo.BajaEventoDeportivo(idEvento);
     }
 }
