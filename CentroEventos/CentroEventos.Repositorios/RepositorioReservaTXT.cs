@@ -77,6 +77,12 @@ namespace CentroEventos.Repositorios
             }
             return reservas;
         }
+
+        public Reserva? ObtenerReservaPorId(int id)
+        {
+            var reservas = ListarReservas(); // Usa la función que lee todas las reservas
+            return reservas.FirstOrDefault(r => r.Id == id);
+        }
         private void GuardarTodo(List<Reserva> reservas)
         {
             using var sw = new StreamWriter(_archivo, append: false);
@@ -88,6 +94,13 @@ namespace CentroEventos.Repositorios
                 sw.WriteLine(r.FechaAltaReserva.ToString("o"));
                 sw.WriteLine(r.EstadoAsistencia);
             }
+        }
+
+        public int eventoid(int id)
+        {
+            var reservas = ListarReservas(); // Usa la función que lee todas las reservas
+            return reservas.FirstOrDefault(r => r.Id == id);
+
         }
     }
 }
