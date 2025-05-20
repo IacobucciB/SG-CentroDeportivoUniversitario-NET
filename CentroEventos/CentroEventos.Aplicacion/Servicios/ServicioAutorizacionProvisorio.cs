@@ -1,5 +1,9 @@
 namespace CentroEventos.Aplicacion;
 
+public class ServicioAutorizacionProvisorio : IServicioAutorizacion
+{
+    public bool PoseeElPermiso(int IdUsuario, Permiso permiso) => true;
+}
 /*
 
 public class ServicioAutorizacionProvisorio(AutorizacionException autorizacion) : IServicioAutorizacion
