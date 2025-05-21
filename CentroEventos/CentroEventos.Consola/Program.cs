@@ -44,7 +44,10 @@ void MainMenu()
                     var persona = new Persona { DNI = "12345678", Nombre = "Juan", Apellido = "Pérez", Email = "juan@mail.com", Telefono = "123456" };
                     altaPersona.Ejecutar(persona, 1);
                     Console.WriteLine("Persona guardada correctamente.");
-
+                    // Otra persona válida reutilizando la variable persona
+                    var persona2 = new Persona { DNI = "23456789", Nombre = "Ana", Apellido = "García", Email = "ana@mail.com", Telefono = "987654" };
+                    altaPersona.Ejecutar(persona2, 1);
+                    Console.WriteLine("Segunda persona guardada correctamente.");
                     // Evento válido (el responsable existe)
                     var evento = new EventoDeportivo
                     {
@@ -57,7 +60,18 @@ void MainMenu()
                     };
                     altaEvento.Ejecutar(evento, 1);
                     Console.WriteLine("Evento guardado correctamente.");
-
+                    // Otro evento válido (el responsable es persona2)
+                    var evento2 = new EventoDeportivo
+                    {
+                        Nombre = "Fútbol",
+                        Descripcion = "Partido amistoso de fútbol",
+                        FechaHoraInicio = DateTime.Now.AddDays(5),
+                        DuracionHoras = 1,
+                        CupoMaximo = 10,
+                        ResponsableId = persona2.Id
+                    };
+                    altaEvento.Ejecutar(evento2, 1);
+                    Console.WriteLine("Segundo evento guardado correctamente.");
                     // Reserva válida
                     var reserva = new Reserva
                     {
@@ -66,6 +80,13 @@ void MainMenu()
                     };
                     altaReserva.Ejecutar(reserva, 1);
                     Console.WriteLine("Reserva guardada correctamente.");
+                    reserva = new Reserva
+                    {
+                        PersonaId = persona2.Id,
+                        EventoDeportivoId = evento2.Id
+                    };
+                    altaReserva.Ejecutar(reserva, 1);
+                    Console.WriteLine("Segunda reserva guardada correctamente.");
                     break;
 
                 case "2":
@@ -140,7 +161,34 @@ void MainMenu()
                     foreach (var r in listarReservas.Ejecutar())
                         Console.WriteLine(r);
                     break;
+                case "4":
+                    // Baja de de reserva Valida
+                    // Se asume que existe y que el usuario tiene permiso
+                    // La baja de las demás entidades se hace de forma similar
+                    var bajaReserva = new BajaReservaUseCase(repoReserva, servicioAutorizacion);
+                    bajaReserva.Ejecutar(2, 1);
+                    Console.WriteLine("Reserva eliminada correctamente.");
+                    break;
+                case "5":
+                    // Modificacion de persona valida
+                    // Se asume que existe
+                    // La modificación de las demás entidades se hace de forma similar
+                    var modificarPersona = new ModificarPersonasUseCase(repoPersona, servicioAutorizacion);
+                    var personaModificada = new Persona
+                    {
+                        Id = 2,
+                        DNI = "23456789",
+                        Nombre = "Ana Modificada",
+                        Apellido = "García Modificada",
+                        Email = "ana_modificada@mail.com",
+                        Telefono = "111222"
+                    };
+                    modificarPersona.Ejecutar(personaModificada, 1);
+                    Console.WriteLine("Persona modificada correctamente.");
+                    break;
+                case "6":
 
+                    break;
                 case "0":
                     return;
                 default:
