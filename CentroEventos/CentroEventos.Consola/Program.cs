@@ -31,6 +31,9 @@ void MainMenu()
         Console.WriteLine("1. Crear y guardar ejemplos válidos");
         Console.WriteLine("2. Probar excepciones de validación");
         Console.WriteLine("3. Listar entidades");
+        Console.WriteLine("4. Baja de reserva");
+        Console.WriteLine("5. Modificar persona");
+        Console.WriteLine("6. Probar excepciones");
         Console.WriteLine("0. Salir");
         Console.Write("Seleccione una opción: ");
         var opcion = Console.ReadLine();
@@ -67,7 +70,7 @@ void MainMenu()
                         Descripcion = "Partido amistoso de fútbol",
                         FechaHoraInicio = DateTime.Now.AddDays(5),
                         DuracionHoras = 1,
-                        CupoMaximo = 10,
+                        CupoMaximo = 1,
                         ResponsableId = persona2.Id
                     };
                     altaEvento.Ejecutar(evento2, 1);
@@ -187,7 +190,63 @@ void MainMenu()
                     Console.WriteLine("Persona modificada correctamente.");
                     break;
                 case "6":
+                    // Testeo de excepciones
+                    // CupoExcedidoException
+                    try
+                    {
+                        // Obtener personas y eventos
+                        var personas = listarPersonas.Ejecutar();
+                        var eventos = listarEventos.Ejecutar();
+                        var eventoCupoLleno = eventos[1];
 
+                        var personaNoInscripta = personas[0];
+
+                        // Intentar reservar cuando el cupo ya está lleno
+                        var reservaCupoExcedido = new Reserva
+                        {
+                            PersonaId = personaNoInscripta.Id,
+                            EventoDeportivoId = eventoCupoLleno.Id
+                        };
+                        altaReserva.Ejecutar(reservaCupoExcedido, 1);
+                    }
+                    catch (CupoExcedidoException ex)
+                    {
+                        Console.WriteLine($"Excepción de cupo excedido: {ex.Message}");
+                    }
+                    // EntidadNotFoundException
+                    try
+                    {
+                        // Intentar reservar un evento que no existe
+                        var reservaInvalida = new Reserva
+                        {
+                            PersonaId = 999, // ID de persona válida
+                            EventoDeportivoId = 999 // ID de evento inválido
+                        };
+                        altaReserva.Ejecutar(reservaInvalida, 1);
+                    }
+                    catch (EntidadNotFoundException ex)
+                    {
+                        Console.WriteLine($"Excepción de entidad no encontrada: {ex.Message}");
+                    }
+                    // FalloAutorizacionException
+                    try
+                    {
+                        // Intentar realizar una acción sin autorización
+                        var eventoNoAutorizado = new EventoDeportivo
+                        {
+                            Nombre = "Evento no autorizado",
+                            Descripcion = "No debería guardarse",
+                            FechaHoraInicio = DateTime.Now.AddDays(1),
+                            DuracionHoras = 1,
+                            CupoMaximo = 5,
+                            ResponsableId = 1 // No existe
+                        };
+                        altaEvento.Ejecutar(eventoNoAutorizado, 0); // ID de usuario no autorizado
+                    }
+                    catch (FalloAutorizacionException ex)
+                    {
+                        Console.WriteLine($"Excepción de autorización: {ex.Message}");
+                    }
                     break;
                 case "0":
                     return;
