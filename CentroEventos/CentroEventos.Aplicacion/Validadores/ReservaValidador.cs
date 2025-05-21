@@ -4,11 +4,24 @@ public class ReservaValidador
 {
     public bool Validar(Reserva reserva, out string mensajeError)
     {
-        mensajeError = ""; 
+        mensajeError = "";
 
+        if (reserva.PersonaId <= 0)
+        {
+            mensajeError = "Debe especificar una persona válida para la reserva.";
+            return false;
+        }
 
+        if (reserva.EventoDeportivoId <= 0)
+        {
+            mensajeError = "Debe especificar un evento deportivo válido para la reserva.";
+            return false;
+        }
 
-        return (mensajeError == "");
+        // No se puede validar existencia, duplicados ni cupo aquí porque no se tiene acceso a los repositorios.
+        // Esas validaciones deben hacerse en el UseCase correspondiente.
+
+        return true;
     }
 }
 
