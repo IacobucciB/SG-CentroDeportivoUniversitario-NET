@@ -1,7 +1,19 @@
-﻿@page "/"
+﻿@using Microsoft.AspNetCore.Components.Routing
+@page "/"
 
-<PageTitle>Home</PageTitle>
+<h1>Centro Deportivo Universitario</h1>
 
-<h1>Hello, world!</h1>
+<div class="bienvenida-container">
+    <div class="header">
+        <div class="logo">Centro Deportivo Universitario</div>
+        <div class="login-link">
+            <NavLink class="btn btn-primary" href="/login">Iniciar Sesión</NavLink>
+        </div>
+    </div>
 
-Welcome to your new app.
+    <div class="contenido-principal">
+        <h1>¡Bienvenido al Centro Deportivo!</h1>
+        <p>Gestioná tus reservas, actividades y usuarios desde una sola plataforma.</p>
+    </div>
+</div>
+
