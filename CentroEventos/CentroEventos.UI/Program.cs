@@ -40,6 +40,9 @@ builder.Services.AddTransient<IServicioAutorizacion, ServicioAutorizacionProviso
 
 // Inicializar DB SQLite
 CentroEventosSqlite.Inicializar();
+
+MockData();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -55,3 +58,30 @@ app.MapRazorComponents<App>()
     .AddInteractiveServerRenderMode();
 
 app.Run();
+
+
+void MockData()
+{
+    var repoPersonaSQL = new RepositorioPersonaSQL();
+    var personaValidadorSQL = new PersonaValidador();
+    var servicioAutorizacionSQL = new ServicioAutorizacionProvisorio();
+    var altaPersonaSQL = new AltaPersonaUseCase(repoPersonaSQL, personaValidadorSQL, servicioAutorizacionSQL);
+    var personaSQL = new Persona
+    {
+        DNI = "12345678",
+        Nombre = "Juan SQL",
+        Apellido = "Pérez SQL",
+        Email = "test@gmail.com"
+    };
+    altaPersonaSQL.Ejecutar(personaSQL, 1);
+    Console.WriteLine("Persona SQL guardada correctamente.");
+
+    // Listar personas con SQLite
+    var listarPersonasSQL = new ListarPersonasUseCase(repoPersonaSQL);
+    Console.WriteLine("\nPersonas en SQLite:");
+    foreach (var p in listarPersonasSQL.Ejecutar())
+    {
+        Console.WriteLine(p);
+    }
+
+}

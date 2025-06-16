@@ -1,0 +1,43 @@
+@page "/PersonaEjemplo"
+@inject ListarPersonasUseCase ListarPersonasUseCase
+
+@code {
+    private List<Persona> personas = new();
+
+    protected override void OnInitialized()
+    {
+        // If Ejecutar() is synchronous, remove await and make method sync
+        personas = ListarPersonasUseCase.Ejecutar().ToList();
+    }
+}
+
+<h3>Personas Registradas</h3>
+
+@if (personas.Count == 0)
+{
+    <p>No hay personas registradas.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var persona in personas)
+            {
+                <tr>
+                    <td>@persona.DNI</td>
+                    <td>@persona.Nombre</td>
+                    <td>@persona.Apellido</td>
+                    <td>@persona.Email</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
