@@ -1,0 +1,79 @@
+@page "/login"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavManager
+
+<h3 class="text-center mt-4">Iniciar Sesión</h3>
+<br>
+<div class="d-flex justify-content-center">
+    <EditForm Model="@loginModel" OnValidSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">Correo electrónico</label>
+            <InputText class="form-control" @bind-Value="loginModel.Email" />
+            <ValidationMessage For="@(() => loginModel.Email)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <InputText class="form-control" @bind-Value="loginModel.Password" type="password" />
+            <ValidationMessage For="@(() => loginModel.Password)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary w-100">Ingresar</button> 
+
+    <div class="text-center mt-3">
+        <span>¿No tenés una cuenta?</span>
+        <NavLink class="btn btn-link" href="/registro">Registrarse</NavLink>
+    </div>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-3">@errorMessage</div>
+        }
+    </EditForm>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private string? errorMessage;
+
+    private async Task OnSubmit()
+    {
+        try
+        {
+            // A futuro: llamá al caso de uso de login acá.
+            var autenticado = await SimularLogin(loginModel.Email, loginModel.Password);
+
+            if (autenticado)
+            {
+                NavManager.NavigateTo("/"); // o a la página principal
+            }
+            else
+            {
+                errorMessage = "Credenciales inválidas.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al intentar iniciar sesión: {ex.Message}";
+        }
+    }
+
+    // TEMPORAL — reemplazar por lógica real
+    private Task<bool> SimularLogin(string email, string password)
+    {
+        return Task.FromResult(email == "admin@admin.com" && password == "1234");
+    }
+
+    public class LoginModel
+    {
+        [Required(ErrorMessage = "El correo es obligatorio")]
+        [EmailAddress(ErrorMessage = "Formato inválido")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        public string Password { get; set; } = "";
+    }
+}

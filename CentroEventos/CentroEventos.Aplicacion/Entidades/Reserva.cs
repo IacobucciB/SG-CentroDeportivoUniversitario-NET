@@ -1,7 +1,6 @@
 namespace CentroEventos.Aplicacion;
 
 
-
 public class Reserva
 {
     public int Id { get; set; }

@@ -1,0 +1,49 @@
+@page "/EventoAdmin"
+@inject ListarEventosDeportivosUseCase ListarEventosUseCase
+
+
+@code {
+    private List<EventoDeportivo> eventos = new();
+
+    protected override void OnInitialized()
+    {
+        eventos = ListarEventosUseCase.Ejecutar().ToList();
+    }
+}
+
+<h3>Eventos Registrados</h3>
+
+@if (eventos.Count == 0)
+{
+    <p>No hay eventos registrados.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Fecha y Hora</th>
+                <th>Duración (hs)</th>
+                <th>Cupo Máximo</th>
+                <th>Responsable ID</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evento in eventos)
+            {
+                <tr>
+                    <td>@evento.Id</td>
+                    <td>@evento.Nombre</td>
+                    <td>@evento.Descripcion</td>
+                    <td>@evento.FechaHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@evento.DuracionHoras</td>
+                    <td>@evento.CupoMaximo</td>
+                    <td>@evento.ResponsableId</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

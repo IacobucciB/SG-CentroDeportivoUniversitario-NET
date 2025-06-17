@@ -1,0 +1,66 @@
+@page "/reservaAdmin"
+@using CentroEventos.Aplicacion;
+@inject ListarReservasUseCase ListarReservasUseCase
+
+<h3 class="mt-4 mb-3">Reservas Registradas</h3>
+
+@if (reservas.Count == 0)
+{
+    <p>No hay reservas registradas.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Persona ID</th>
+                <th>Evento ID</th>
+                <th>Fecha de Reserva</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reserva in reservas)
+            {
+                <tr>
+                    <td>@reserva.Id</td>
+                    <td>@reserva.PersonaId</td>
+                    <td>@reserva.EventoDeportivoId</td>
+                    <td>@reserva.FechaAltaReserva.ToString("dd/MM/yyyy")</td>
+                    <td>@reserva.EstadoAsistencia</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarReserva(reserva.Id)">
+                            Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarReserva(reserva.Id)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Reserva> reservas = new();
+
+    protected override void OnInitialized()
+    {
+        reservas = ListarReservasUseCase.Ejecutar().ToList();
+    }
+
+    private void EditarReserva(int id)
+    {
+        // En el futuro: redirigir o abrir modal de edición
+        Console.WriteLine($"EDITAR reserva ID {id}");
+    }
+
+    private void EliminarReserva(int id)
+    {
+        // En el futuro: ejecutar baja lógica
+        Console.WriteLine($"ELIMINAR reserva ID {id}");
+    }
+}

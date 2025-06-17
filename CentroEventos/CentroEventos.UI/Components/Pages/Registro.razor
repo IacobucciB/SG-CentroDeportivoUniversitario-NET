@@ -1,0 +1,103 @@
+@page "/registro"
+@using System.ComponentModel.DataAnnotations
+@inject NavigationManager NavManager
+
+<h3 class="text-center mt-4">Registro de Usuario</h3>
+<br>
+<div class="d-flex justify-content-center">
+    <EditForm Model="@registroModel" OnValidSubmit="OnSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="mb-3">
+            <label class="form-label">DNI</label>
+            <InputText class="form-control" @bind-Value="registroModel.Dni" />
+            <ValidationMessage For="@(() => registroModel.Dni)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Nombre</label>
+            <InputText class="form-control" @bind-Value="registroModel.Nombre" />
+            <ValidationMessage For="@(() => registroModel.Nombre)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Apellido</label>
+            <InputText class="form-control" @bind-Value="registroModel.Apellido" />
+            <ValidationMessage For="@(() => registroModel.Apellido)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Correo Electrónico</label>
+            <InputText class="form-control" @bind-Value="registroModel.Email" />
+            <ValidationMessage For="@(() => registroModel.Email)" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Contraseña</label>
+            <InputText type="password" class="form-control" @bind-Value="registroModel.Password" />
+            <ValidationMessage For="@(() => registroModel.Password)" />
+        </div>
+
+        <button type="submit" class="btn btn-success w-100">Registrarse</button>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger mt-3">@errorMessage</div>
+        }
+    </EditForm>
+</div>
+
+@code {
+    private RegistroModel registroModel = new();
+    private string? errorMessage;
+
+    private async Task OnSubmit()
+    {
+        try
+        {
+            // Reemplazar por llamado real a un caso de uso
+            var resultado = await SimularRegistro(registroModel);
+
+            if (resultado)
+            {
+                NavManager.NavigateTo("/login");
+            }
+            else
+            {
+                errorMessage = "No se pudo registrar el usuario.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+        }
+    }
+
+    // Simulación temporal — reemplazar por caso de uso real
+    private Task<bool> SimularRegistro(RegistroModel model)
+    {
+        // Aquí se aplicaría la lógica real
+        return Task.FromResult(true);
+    }
+
+    public class RegistroModel
+    {
+        [Required(ErrorMessage = "El DNI es obligatorio")]
+        public string Dni { get; set; } = "";
+
+        [Required(ErrorMessage = "El nombre es obligatorio")]
+        public string Nombre { get; set; } = "";
+
+        [Required(ErrorMessage = "El apellido es obligatorio")]
+        public string Apellido { get; set; } = "";
+
+        [Required(ErrorMessage = "El email es obligatorio")]
+        [EmailAddress(ErrorMessage = "Formato de email inválido")]
+        public string Email { get; set; } = "";
+
+        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [MinLength(4, ErrorMessage = "Debe tener al menos 4 caracteres")]
+        public string Password { get; set; } = "";
+    }
+}

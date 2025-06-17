@@ -1,0 +1,64 @@
+@page "/PersonaAdmin"
+@using CentroEventos.Aplicacion;
+@inject ListarPersonasUseCase ListarPersonasUseCase
+
+<h3>Personas Registradas</h3>
+
+@if (personas.Count == 0)
+{
+    <p>No hay personas registradas.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var persona in personas)
+            {
+                <tr>
+                    <td>@persona.DNI</td>
+                    <td>@persona.Nombre</td>
+                    <td>@persona.Apellido</td>
+                    <td>@persona.Email</td>
+                    <td>
+                        <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarPersona(persona.Id)">
+                            Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarPersona(persona.Id)">
+                            Eliminar
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Persona> personas = new();
+
+    protected override void OnInitialized()
+    {
+        personas = ListarPersonasUseCase.Ejecutar().ToList();
+    }
+
+    private void EditarPersona(int id)
+    {
+        // Simulación: más adelante podés navegar a /PersonaEditar/{id}
+        Console.WriteLine($"EDITAR persona ID {id}");
+    }
+
+    private void EliminarPersona(int id)
+    {
+        // Simulación: más adelante llamás a EliminarPersonaUseCase
+        Console.WriteLine($"ELIMINAR persona ID {id}");
+    }
+}
