@@ -63,6 +63,7 @@ app.Run();
 
 void MockData()
 {
+    
     var repoPersonaSQL = new RepositorioPersonaSQL();
     var repoEventoSQL = new RepositorioEventoDeportivoSQL();
     var repoReservaSQL = new RepositorioReservaSQL();
@@ -71,6 +72,7 @@ void MockData()
     var listarEventosSQL = new ListarEventosDeportivosUseCase(repoEventoSQL);
     var listarReservasSQL = new ListarReservasUseCase(repoReservaSQL);
 
+    /*
     // Limpiar datos previos
     foreach (var r in listarReservasSQL.Ejecutar())
     {
@@ -86,6 +88,7 @@ void MockData()
     {
         repoPersonaSQL.EliminarPersona(p.Id);
     }
+    */
     
     var personaValidadorSQL = new PersonaValidador();
     var servicioAutorizacionSQL = new ServicioAutorizacionProvisorio();
@@ -97,7 +100,8 @@ void MockData()
         Nombre = "Juan SQL",
         Apellido = "Pérez SQL",
         Email = "test@gmail.com",
-        Contrasena = "aaa"
+        Contrasena = "aaa",
+        ListaPermisos = new List<Permiso> { Permiso.EventoAlta, Permiso.EventoModificacion, Permiso.EventoBaja, Permiso.ReservaAlta, Permiso.ReservaModificacion, Permiso.ReservaBaja, Permiso.UsuarioAlta, Permiso.UsuarioModificacion, Permiso.UsuarioBaja }
     };
     altaPersonaSQL.Ejecutar(personaSQL, 1);
     Console.WriteLine("Persona SQL guardada correctamente.");
