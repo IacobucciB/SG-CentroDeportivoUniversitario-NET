@@ -1,6 +1,7 @@
 using CentroEventos.UI.Components;
 using CentroEventos.Aplicacion;
 using CentroEventos.Repositorios;
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,7 +37,7 @@ builder.Services.AddScoped<IRepositorioEventoDeportivo, RepositorioEventoDeporti
 
 // Servicios
 builder.Services.AddTransient<IServicioAutorizacion, ServicioAutorizacionProvisorio>();
-//builder.Services.AddScoped<UsuarioActualService>();
+builder.Services.AddSingleton<ServicioUsuarioActualProvisorio>();
 
 // Inicializar DB SQLite
 CentroEventosSqlite.Inicializar();
@@ -63,25 +64,53 @@ app.Run();
 void MockData()
 {
     var repoPersonaSQL = new RepositorioPersonaSQL();
+    var repoEventoSQL = new RepositorioEventoDeportivoSQL();
+    var repoReservaSQL = new RepositorioReservaSQL();
+
+    var listarPersonasSQL = new ListarPersonasUseCase(repoPersonaSQL);
+    var listarEventosSQL = new ListarEventosDeportivosUseCase(repoEventoSQL);
+    var listarReservasSQL = new ListarReservasUseCase(repoReservaSQL);
+
+    // Limpiar datos previos
+    foreach (var r in listarReservasSQL.Ejecutar())
+    {
+        repoReservaSQL.BajaReserva(r.Id);
+    }
+
+    foreach (var e in listarEventosSQL.Ejecutar())
+    {
+        repoEventoSQL.BajaEventoDeportivo(e.Id);
+    }
+
+    foreach (var p in listarPersonasSQL.Ejecutar())
+    {
+        repoPersonaSQL.EliminarPersona(p.Id);
+    }
+    
     var personaValidadorSQL = new PersonaValidador();
     var servicioAutorizacionSQL = new ServicioAutorizacionProvisorio();
     var altaPersonaSQL = new AltaPersonaUseCase(repoPersonaSQL, personaValidadorSQL, servicioAutorizacionSQL);
     var personaSQL = new Persona
     {
+       // Id = "1",
         DNI = "12345678",
         Nombre = "Juan SQL",
         Apellido = "Pérez SQL",
-        Email = "test@gmail.com"
+        Email = "test@gmail.com",
+        Contrasena = "aaa"
     };
     altaPersonaSQL.Ejecutar(personaSQL, 1);
     Console.WriteLine("Persona SQL guardada correctamente.");
 
     // Listar personas con SQLite
-    var listarPersonasSQL = new ListarPersonasUseCase(repoPersonaSQL);
+    
     Console.WriteLine("\nPersonas en SQLite:");
     foreach (var p in listarPersonasSQL.Ejecutar())
     {
         Console.WriteLine(p);
     }
+
+    var usuarioActual = new ServicioUsuarioActualProvisorio();
+    usuarioActual.EstablecerPersona(personaSQL);
 
 }

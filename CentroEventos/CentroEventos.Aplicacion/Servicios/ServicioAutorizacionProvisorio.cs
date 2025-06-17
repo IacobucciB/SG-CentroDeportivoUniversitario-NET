@@ -2,15 +2,13 @@ namespace CentroEventos.Aplicacion;
 
 public class ServicioAutorizacionProvisorio : IServicioAutorizacion
 {
-    public bool EsAdmin(int IdUsuario)
+    public bool PoseeElPermiso(int IdUsuario, Permiso permiso)
     {
-        return IdUsuario == 1;
+        return true;
     }
-    /*
-    public bool PoseePermiso(int IdUsuario, Permiso permiso) {
-
-        return
+    public bool EsAdmin(int Id)
+    {
+        return Id >= 30;
     }
-    */
 }
 
