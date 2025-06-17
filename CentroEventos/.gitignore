@@ -1,5 +1,11 @@
-# IGNORAR CARPETA OBJ
+# Ignorar todas las carpetas obj y su contenido
+obj/
+*/obj/
 **/obj/
+
+# Ignorar todas las carpetas Debug dentro de obj
+obj/Debug/
+*/obj/Debug/
 **/obj/Debug/
 
 ## Ignore Visual Studio temporary files, build results, and
