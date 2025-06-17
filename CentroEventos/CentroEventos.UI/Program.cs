@@ -36,6 +36,7 @@ builder.Services.AddScoped<IRepositorioEventoDeportivo, RepositorioEventoDeporti
 
 // Servicios
 builder.Services.AddTransient<IServicioAutorizacion, ServicioAutorizacionProvisorio>();
+//builder.Services.AddScoped<UsuarioActualService>();
 
 // Inicializar DB SQLite
 CentroEventosSqlite.Inicializar();
