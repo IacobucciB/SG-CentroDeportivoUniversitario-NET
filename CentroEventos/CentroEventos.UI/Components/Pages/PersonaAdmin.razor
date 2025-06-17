@@ -1,0 +1,168 @@
+@page "/PersonaAdmin"
+@using CentroEventos.Aplicacion;
+@inject ListarPersonasUseCase ListarPersonasUseCase
+@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject IServicioAutorizacion ServicioAutorizacion
+
+<h3 class="d-flex justify-content-between align-items-center">
+    <span>Personas Registradas</span>
+    @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+    {
+        <button class="btn btn-success" @onclick="() => mostrarFormularioCrear = true">
+            <i class="bi bi-plus-circle me-1"></i> + Agregar Persona
+        </button>
+    }
+</h3>
+
+@*
+<!-- MODAL -->
+<div class="modal fade" id="modalAgregarPersona" tabindex="-1" aria-labelledby="modalAgregarPersonaLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <EditForm Model="@nuevaPersona" OnValidSubmit="GuardarPersona">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAgregarPersonaLabel">Nueva Persona</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-2">
+                        <label>DNI</label>
+                        <InputText class="form-control" @bind-Value="nuevaPersona.DNI" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Nombre</label>
+                        <InputText class="form-control" @bind-Value="nuevaPersona.Nombre" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Apellido</label>
+                        <InputText class="form-control" @bind-Value="nuevaPersona.Apellido" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Email</label>
+                        <InputText class="form-control" @bind-Value="nuevaPersona.Email" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Teléfono</label>
+                        <InputText class="form-control" @bind-Value="nuevaPersona.Telefono" />
+                    </div>
+                    <div class="mb-2">
+                        <label>Permisos (separados por coma)</label>
+                        <InputText class="form-control" @bind="permisosInput" />
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+*@
+<!-- TABLA -->
+@if (personas.Count == 0)
+{
+    <p>No hay personas registradas.</p>
+}
+else
+{
+    <table class="table table-striped table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Permisos</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var persona in personas)
+            {
+                <tr>
+                    <td>@persona.DNI</td>
+                    <td>@persona.Nombre</td>
+                    <td>@persona.Apellido</td>
+                    <td>@persona.Email</td>
+                    <td>@persona.Telefono</td>
+                    <td>
+                        @if (persona.ListaPermisos?.Count > 0)
+                        {
+                            <ul class="mb-0">
+                                @foreach (var permiso in persona.ListaPermisos)
+                                {
+                                    <li>@permiso</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sin permisos</span>
+                        }
+                    </td>
+                    <td>
+                        @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+                        {
+                            <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarPersona(persona.Id)">Editar</button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarPersona(persona.Id)">Eliminar</button>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Persona> personas = new();
+    private Persona nuevaPersona = new();
+    private bool mostrarFormularioCrear = false;
+    private string permisosInput = "";
+
+    protected override void OnInitialized()
+    {
+        personas = ListarPersonasUseCase.Ejecutar().ToList();
+    }
+
+
+ //ARREGLAR EL GUARDAR PERSONA
+    private void GuardarPersona()
+    {
+        /*
+        nuevaPersona.ListaPermisos = permisosInput
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(p => p.Trim())
+            .ToList();
+
+        // Simulación - Acá deberías usar un UseCase como CrearPersonaUseCase.Ejecutar(nuevaPersona);
+        personas.Add(nuevaPersona);
+        Console.WriteLine($"Persona creada: {nuevaPersona.Nombre} {nuevaPersona.Apellido}");
+
+        // Reset y cerrar formulario
+        nuevaPersona = new();
+        permisosInput = "";
+        mostrarFormularioCrear = false;
+        */
+    }
+
+    private void CancelarCrearPersona()
+    {
+        nuevaPersona = new();
+        permisosInput = "";
+        mostrarFormularioCrear = false;
+    }
+
+    private void EditarPersona(int id)
+    {
+        Console.WriteLine($"EDITAR persona ID {id}");
+    }
+
+    private void EliminarPersona(int id)
+    {
+        Console.WriteLine($"ELIMINAR persona ID {id}");
+    }
+}
+
+

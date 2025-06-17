@@ -1,0 +1,84 @@
+@page "/login"
+@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject NavigationManager NavManager
+@inject IServicioAutorizacion ServicioAutorizacion;
+@inject ListarPersonasUseCase ListarPersonasUseCase
+@rendermode InteractiveServer
+
+<PageTitle>SGE - Iniciar Sesión</PageTitle>
+
+<div class="d-flex justify-content-center">
+    <div style="width: 400px;">
+        <h3 class="text-center mt-4">Iniciar Sesión</h3>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
+                <ValidationMessage For="@(() => loginModel.Email)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <InputText id="password" class="form-control" type="password" @bind-Value="loginModel.Password" />
+                <ValidationMessage For="@(() => loginModel.Password)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+
+            <div class="text-center mt-3">
+                <span>¿No tenés una cuenta?</span>
+                <NavLink class="btn btn-link" href="/Registro">Registrarse</NavLink>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private LoginModel loginModel = new();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            var personas = ListarPersonasUseCase.Ejecutar();
+
+            var persona = personas.FirstOrDefault(p =>
+                p.Email.Equals(loginModel.Email, StringComparison.OrdinalIgnoreCase) &&
+                p.Contrasena == loginModel.Password);
+               
+
+            if (persona != null)
+            {
+                UsuarioActual.EstablecerPersona(persona);
+                Console.WriteLine("Usuario autenticado: " + persona.Email);
+                
+                NavManager.NavigateTo("/");
+            }
+            else
+            {
+                errorMessage = "Credenciales inválidas.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al intentar iniciar sesión: {ex.Message}";
+        }
+    }
+
+     private class LoginModel
+    {
+        public string? Email { get; set; }
+        public string? Password { get; set; }
+    }
+
+}

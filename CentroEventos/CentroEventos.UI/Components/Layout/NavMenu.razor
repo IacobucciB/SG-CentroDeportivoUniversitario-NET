@@ -1,4 +1,7 @@
-﻿<div class="top-row ps-3 navbar navbar-dark">
+﻿@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject IServicioAutorizacion ServicioAutorizacion;
+
+<div class="top-row ps-3 navbar navbar-dark">
     <div class="container-fluid">
         <a class="navbar-brand" href="">CentroEventos.UI</a>
     </div>
@@ -25,6 +28,40 @@
                 <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
             </NavLink>
         </div>
+
+
+         @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+                {
+                    
+                }
+
+
+
+          @*Solo usuarios logeados*@
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/PersonaAdmin">
+                    <span class="bi bi-people-fill me-2"></span> Personas
+                </NavLink>
+            </div>
+        
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/EventoAdmin">
+                    <span class="bi bi-calendar-event-fill me-2"></span> Eventos
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="/ReservaAdmin">
+                    <span class="bi bi-journal-bookmark-fill me-2"></span> Reservas
+                </NavLink>
+            </div>
+        
     </nav>
 </div>
+
+
+using System.Diagnostics.Eventing.Reader;
+#line default
+#line hidden
+
+
 
