@@ -1,6 +1,7 @@
 @page "/EventoAdmin"
 @inject ListarEventosDeportivosUseCase ListarEventosUseCase
-
+@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject IServicioAutorizacion ServicioAutorizacion
 
 @code {
     private List<EventoDeportivo> eventos = new();
@@ -8,6 +9,18 @@
     protected override void OnInitialized()
     {
         eventos = ListarEventosUseCase.Ejecutar().ToList();
+    }
+
+    private void EditarEvento(int eventoId)
+    {
+        Console.WriteLine($"Editar evento {eventoId}");
+        // Redirigir o mostrar modal, según tu implementación
+    }
+
+    private void EliminarEvento(int eventoId)
+    {
+        Console.WriteLine($"Eliminar evento {eventoId}");
+        // Confirmar y eliminar, según tu implementación
     }
 }
 
@@ -29,6 +42,11 @@ else
                 <th>Duración (hs)</th>
                 <th>Cupo Máximo</th>
                 <th>Responsable ID</th>
+                @* Columna para acciones *@
+                @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+                {
+                    <th>Acciones</th>
+                }
             </tr>
         </thead>
         <tbody>
@@ -42,6 +60,17 @@ else
                     <td>@evento.DuracionHoras</td>
                     <td>@evento.CupoMaximo</td>
                     <td>@evento.ResponsableId</td>
+                    @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+                    {
+                        <td>
+                            <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarEvento(evento.Id)">
+                                Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarEvento(evento.Id)">
+                                Eliminar
+                            </button>
+                        </td>
+                    }
                 </tr>
             }
         </tbody>

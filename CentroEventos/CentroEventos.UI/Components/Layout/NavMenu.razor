@@ -29,14 +29,21 @@
             </NavLink>
         </div>
 
-       
-       @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
-        { 
+
+         @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+                {
+                    
+                }
+
+
+
+          @*Solo usuarios logeados*@
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/PersonaAdmin">
                     <span class="bi bi-people-fill me-2"></span> Personas
                 </NavLink>
             </div>
+        
             <div class="nav-item px-3">
                 <NavLink class="nav-link" href="/EventoAdmin">
                     <span class="bi bi-calendar-event-fill me-2"></span> Eventos
@@ -47,7 +54,7 @@
                     <span class="bi bi-journal-bookmark-fill me-2"></span> Reservas
                 </NavLink>
             </div>
-        } 
+        
     </nav>
 </div>
 
