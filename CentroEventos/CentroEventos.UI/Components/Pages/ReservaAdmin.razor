@@ -2,6 +2,9 @@
 @using CentroEventos.Aplicacion;
 @inject ListarReservasUseCase ListarReservasUseCase
 
+ @inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject IServicioAutorizacion ServicioAutorizacion;                       
+
 <h3 class="mt-4 mb-3">Reservas Registradas</h3>
 
 @if (reservas.Count == 0)
@@ -31,12 +34,15 @@ else
                     <td>@reserva.FechaAltaReserva.ToString("dd/MM/yyyy")</td>
                     <td>@reserva.EstadoAsistencia</td>
                     <td>
-                        <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarReserva(reserva.Id)">
-                            Editar
-                        </button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => EliminarReserva(reserva.Id)">
-                            Eliminar
-                        </button>
+                         @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+                        {
+                            <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarReserva(reserva.Id)">
+                                Editar
+                            </button>
+                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarReserva(reserva.Id)">
+                                Eliminar
+                            </button>
+                        }
                     </td>
                 </tr>
             }
