@@ -10,9 +10,7 @@
     <span>Personas Registradas</span>
     @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
     {
-        //<button class="btn btn-success" @onclick="() => mostrarFormularioCrear = true">
-          //  <i class="bi bi-plus-circle me-1"></i> + Agregar Persona
-        //</button>
+        <button class="btn btn-danger" @onclick= "() => AgregarPersona()">Agregar Persona</button>
     }
 </h3>
 
@@ -81,15 +79,8 @@ else
     private List<Persona> personas = new();
     private Persona nuevaPersona = new();
 
-    
-
     //Pruebas qcyo
     private int currentCount = 0;
-
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
     DialogoConfirmacion dialogo = null!;
     private void ConfirmarReseteo(int Id)
     {
@@ -104,7 +95,10 @@ else
     {
         personas = ListarPersonasUseCase.Ejecutar().ToList();
     }
-
+    private void AgregarPersona()
+    {
+        Console.WriteLine($"Agregar persona");
+    }
     private void EliminarPersona(int id)
     {
         Console.WriteLine($"ELIMINAR persona ID {id}");

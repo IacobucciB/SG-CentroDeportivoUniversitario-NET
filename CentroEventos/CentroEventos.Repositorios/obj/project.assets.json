@@ -1279,19 +1279,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Lucas\\.nuget\\packages\\": {}
+    "C:\\Users\\Neme\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\Lucas\\Desktop\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Repositorios\\CentroEventos.Repositorios.csproj",
+      "projectUniqueName": "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Repositorios\\CentroEventos.Repositorios.csproj",
       "projectName": "CentroEventos.Repositorios",
-      "projectPath": "C:\\Users\\Lucas\\Desktop\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Repositorios\\CentroEventos.Repositorios.csproj",
-      "packagesPath": "C:\\Users\\Lucas\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\Lucas\\Desktop\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Repositorios\\obj\\",
+      "projectPath": "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Repositorios\\CentroEventos.Repositorios.csproj",
+      "packagesPath": "C:\\Users\\Neme\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Repositorios\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Lucas\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Neme\\AppData\\Roaming\\NuGet\\NuGet.Config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
@@ -1303,8 +1303,8 @@
         "net8.0": {
           "targetAlias": "net8.0",
           "projectReferences": {
-            "C:\\Users\\Lucas\\Desktop\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj": {
-              "projectPath": "C:\\Users\\Lucas\\Desktop\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj"
+            "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj": {
+              "projectPath": "C:\\Users\\Neme\\Documents\\GitHub\\SG-CentroDeportivoUniversitario-NET\\CentroEventos\\CentroEventos.Aplicacion\\CentroEventos.Aplicacion.csproj"
             }
           }
         }
@@ -1313,6 +1313,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -1340,7 +1345,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.409/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
