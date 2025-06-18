@@ -1,7 +1,7 @@
 @inject NavigationManager NavManager
 @inject ListarReservasUseCase ListarReservasUseCase
 @inject IServicioAutorizacion ServicioAutorizacion
-@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject ServicioSesion UsuarioActual
 @inject AltaPersonaUseCase AltaPersonaUseCase
 
 @rendermode InteractiveServer
@@ -76,7 +76,7 @@
             AltaPersonaUseCase.Ejecutar(persona, 1);
 
             // Opcional: establecer usuario actual
-            UsuarioActual.EstablecerPersona(persona);
+            UsuarioActual.IniciarSesion(persona);
 
             NavManager.NavigateTo("/");
         }
