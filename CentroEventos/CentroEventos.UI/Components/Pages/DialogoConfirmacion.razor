@@ -1,0 +1,208 @@
+@rendermode InteractiveServer
+@using CentroEventos.UI.Components
+@using Microsoft.AspNetCore.Components.Forms
+@using CentroEventos.Aplicacion
+@inject NavigationManager NavManager
+@inject ListarReservasUseCase ListarReservasUseCase
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject AltaPersonaUseCase AltaPersonaUseCase
+@inject IRepositorioPersona RepositorioPersonaSQL
+@inject ModificarPersonasUseCase ModificarPersonaUseCase
+
+@if (visible)
+{
+    <style>
+        .dialogo-contenedor {
+        position: fixed;
+        top:0;
+        left: 0;
+        right: 0;
+        bottom:0;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        }   
+
+        .dialogo-contenido{
+        width: 50%;
+        padding: 20px;
+        background-color: white;
+        }
+    </style>
+   <div class="dialogo-contenedor">
+       <div class="dialogo-contenido">
+
+        
+            <h3>@Mensaje</h3>
+            <td>@persona.DNI</td>
+            <td>@persona.Nombre</td>
+            <td>@persona.Apellido</td>
+            <td>@persona.Email</td>
+            <td>@persona.Telefono</td>
+
+
+            <EditForm Model="@registroModel" OnValidSubmit="OnSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label class="form-label">DNI</label>
+                <InputText class="form-control" @bind-Value="registroModel.Dni" />
+                <ValidationMessage For="@(() => registroModel.Dni)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Nombre</label>
+                <InputText class="form-control" @bind-Value="registroModel.Nombre" />
+                <ValidationMessage For="@(() => registroModel.Nombre)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Apellido</label>
+                <InputText class="form-control" @bind-Value="registroModel.Apellido" />
+                <ValidationMessage For="@(() => registroModel.Apellido)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Correo Electrónico</label>
+                <InputText class="form-control" @bind-Value="registroModel.Email" />
+                <ValidationMessage For="@(() => registroModel.Email)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Contraseña</label>
+                <InputText type="password" class="form-control" @bind-Value="registroModel.Password" />
+                <ValidationMessage For="@(() => registroModel.Password)" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Permisos</label>
+                <div>
+                    @foreach (var permiso in todosLosPermisos)
+                    {
+                        <div class="form-check form-check-inline">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   id="@permiso.ToString()"
+                                   value="@permiso"
+                                   @onchange="e => OnPermisoChanged(permiso, e.Value)" 
+                                   checked="@registroModel.PermisosSeleccionados.Contains(permiso)" />
+                            <label class="form-check-label" for="@permiso.ToString()">@permiso.ToString()</label>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <button type="submit" class="btn btn-success w-100">Modificar</button>
+            <button class="btn btn-secondary" @onclick="Cerrar">Cancelar</button>
+        </EditForm>
+           <button class="btn btn-primary" @onclick="CerrarYconfirmar">Aceptar</button>
+       </div>
+   </div>
+}
+
+
+@code{
+    private bool visible = false;
+    [Parameter]
+
+    public Persona? persona { get; set; }
+    
+    [Parameter]
+    public string Mensaje {get;set;}="";
+
+    // Lista de todos los permisos posibles
+    private Permiso[] todosLosPermisos = Enum.GetValues<Permiso>();
+
+    public void Mostrar(int id)
+    {
+        persona = RepositorioPersonaSQL.GetPersona(id);
+        if (persona != null)
+        {
+            registroModel.Id = persona.Id;
+            registroModel.Dni = persona.DNI;
+            registroModel.Nombre = persona.Nombre;
+            registroModel.Apellido = persona.Apellido;
+            registroModel.Email = persona.Email;
+            registroModel.PermisosSeleccionados = persona.ListaPermisos.ToList();
+            // No asignar password por seguridad
+        }
+        visible = true;
+        StateHasChanged();
+    }
+    void Cerrar()
+    {
+        visible=false;
+    }
+
+    [Parameter]
+    public EventCallback OnConfirmado{get;set;}
+
+    void CerrarYconfirmar()
+    {
+        visible=false;
+        OnConfirmado.InvokeAsync();
+    }
+
+    private RegistroModel registroModel = new();
+    private string? errorMessage;
+
+    private void OnPermisoChanged(Permiso permiso, object? checkedValue)
+    {
+        bool isChecked = checkedValue is bool b && b;
+        if (isChecked)
+        {
+            if (!registroModel.PermisosSeleccionados.Contains(permiso))
+                registroModel.PermisosSeleccionados.Add(permiso);
+        }
+        else
+        {
+            registroModel.PermisosSeleccionados.Remove(permiso);
+        }
+    }
+
+    private async Task OnSubmit()
+    {
+        
+        try
+        {
+            
+            // Crear la entidad Persona
+            var persona = new CentroEventos.Aplicacion.Persona
+            {
+                Id = registroModel.Id,
+                DNI = registroModel.Dni,
+                Nombre = registroModel.Nombre,
+                Apellido = registroModel.Apellido,
+                Email = registroModel.Email,
+                Contrasena = registroModel.Password,
+                ListaPermisos = registroModel.PermisosSeleccionados.ToList()
+            };
+
+            ModificarPersonaUseCase.Ejecutar(persona, persona.Id);
+            // Opcional: establecer usuario actual
+            //UsuarioActual.EstablecerPersona(persona);
+
+            NavManager.NavigateTo("/");
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            Console.WriteLine("errorMessage: " + errorMessage);
+        }
+    }
+
+    private class RegistroModel
+    {
+        public int Id { get; set; }
+        public string Dni { get; set; } = "";
+        public string Nombre { get; set; } = "";
+        public string Apellido { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public List<Permiso> PermisosSeleccionados { get; set; } = new();
+    }
+}

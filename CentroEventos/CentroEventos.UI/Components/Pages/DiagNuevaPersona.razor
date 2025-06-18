@@ -1,0 +1,78 @@
+@rendermode InteractiveServer
+
+@if (visible)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+
+                <div class="modal-header">
+                    <h5 class="modal-title">Nueva Persona</h5>
+                    <button type="button" class="btn-close" @onclick="Cerrar"></button>
+                </div>
+
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label>Nombre</label>
+                        <input class="form-control" @bind="Nombre" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Apellido</label>
+                        <input class="form-control" @bind="Apellido" />
+                    </div>
+                    <div class="mb-3">
+                        <label>Edad</label>
+                        <input type="number" class="form-control" @bind="Edad" />
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button class="btn btn-secondary" @onclick="Cerrar">Cancelar</button>
+                    <button class="btn btn-primary" @onclick="Aceptar">Guardar</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private bool visible = false;
+
+    public string Nombre { get; set; } = "";
+    public string Apellido { get; set; } = "";
+    public int Edad { get; set; }
+
+    [Parameter] public EventCallback<Persona> OnGuardar { get; set; }
+
+    public void Mostrar()
+    {
+        visible = true;
+        StateHasChanged();
+    }
+
+    private void Cerrar()
+    {
+        visible = false;
+    }
+
+    private async Task Aceptar()
+    {
+        var persona = new Persona
+        {
+            Nombre = this.Nombre,
+            Apellido = this.Apellido,
+            Edad = this.Edad
+        };
+
+        await OnGuardar.InvokeAsync(persona);
+        Cerrar();
+    }
+
+    public class Persona
+    {
+        public string Nombre { get; set; } = "";
+        public string Apellido { get; set; } = "";
+        public int Edad { get; set; }
+    }
+}
