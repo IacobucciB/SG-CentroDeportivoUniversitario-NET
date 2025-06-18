@@ -1,32 +1,19 @@
 @page "/EventoAdmin"
+@rendermode InteractiveServer
+@using CentroEventos.Aplicacion
 @inject ListarEventosDeportivosUseCase ListarEventosUseCase
 @inject ServicioSesion UsuarioActual
 @inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavManager
 
-@rendermode InteractiveServer
-
-@code {
-    private List<EventoDeportivo> eventos = new();
-
-    protected override void OnInitialized()
-    {
-        eventos = ListarEventosUseCase.Ejecutar().ToList();
-    }
-
-    private void EditarEvento(int eventoId)
-    {
-        Console.WriteLine($"Editar evento {eventoId}");
-        // Redirigir o mostrar modal, según tu implementación
-    }
-
-    private void EliminarEvento(int eventoId)
-    {
-        Console.WriteLine($"Eliminar evento {eventoId}");
-        // Confirmar y eliminar, según tu implementación
-    }
-}
-
-<h3>Eventos Registrados</h3>
+<h3 class="d-flex justify-content-between align-items-center">
+    <span>Eventos Registrados</span>
+   
+        <button class="btn btn-success" @onclick="@(() => NavManager.NavigateTo("/EventoCrear"))">
+            <i class="bi bi-plus-circle me-1"></i> + Crear Evento
+        </button>
+    
+</h3>
 
 @if (eventos.Count == 0)
 {
@@ -44,7 +31,6 @@ else
                 <th>Duración (hs)</th>
                 <th>Cupo Máximo</th>
                 <th>Responsable ID</th>
-                @* Columna para acciones *@
                 @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
                 {
                     <th>Acciones</th>
@@ -73,8 +59,34 @@ else
                             </button>
                         </td>
                     }
+                    
                 </tr>
             }
         </tbody>
     </table>
+}
+
+@code {
+   
+    private List<EventoDeportivo> eventos = new();
+
+    protected override void OnInitialized()
+    {
+        eventos = ListarEventosUseCase.Ejecutar().ToList();
+    }
+
+    private void EditarEvento(int eventoId)
+    {
+        Console.WriteLine($"Editar evento {eventoId}");
+    }
+
+    private void EliminarEvento(int eventoId)
+    {
+        Console.WriteLine($"Eliminar evento {eventoId}");
+    }
+
+    private void MostrarDialogoCrear()
+    {
+        NavManager.NavigateTo("/EventoCrear");
+    }
 }
