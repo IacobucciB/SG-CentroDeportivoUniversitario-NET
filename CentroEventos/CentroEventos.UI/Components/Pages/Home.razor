@@ -1,9 +1,13 @@
 ﻿@page "/"
 @using Microsoft.AspNetCore.Components.Routing
+@inject ServicioUsuarioActualProvisorio UsuarioActual
 
-<div class="d-flex justify-content-end">
-    <NavLink class="btn btn-primary mt-3 me-4" href="/login">Iniciar Sesión</NavLink>
-</div>
+@if (!UsuarioActual.EstaLogueado)
+{
+    <div class="d-flex justify-content-end">
+        <NavLink class="btn btn-primary mt-3 me-4" href="/login">Iniciar Sesión</NavLink>
+    </div>
+}
 
 <div class="text-center mt-5">
     <h1 class="display-4">¡Bienvenido al Centro Deportivo!</h1>
