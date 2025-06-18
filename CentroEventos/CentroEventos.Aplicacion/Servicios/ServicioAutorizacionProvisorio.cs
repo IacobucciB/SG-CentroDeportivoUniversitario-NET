@@ -8,7 +8,7 @@ public class ServicioAutorizacionProvisorio : IServicioAutorizacion
     }
     public bool EsAdmin(int Id)
     {
-        return Id >= 30;
+        return Id == 1;
     }
 }
 

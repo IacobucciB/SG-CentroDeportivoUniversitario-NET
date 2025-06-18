@@ -64,11 +64,13 @@ else
                     </td>
                     <td>
                         
+                        @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+                           {  
                             <button class="btn btn-danger" @onclick= "() => ConfirmarReseteo(persona.Id)">Editar</button>
-                            <DialogoConfirmacion @ref=dialogo Mensaje="Editar"
-                            OnConfirmado="Resetear" />
+                                <DialogoConfirmacion @ref=dialogo Mensaje="Editar"
+                                OnConfirmado="Resetear" />
                             <button class="btn btn-danger btn-sm" @onclick="() => EliminarPersona(persona.Id)">Eliminar</button>
-                        
+                           }
                     </td>
                 </tr>
             }
