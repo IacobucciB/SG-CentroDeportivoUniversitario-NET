@@ -1,0 +1,70 @@
+@page "/EventoCrear"
+
+@rendermode InteractiveServer
+@using CentroEventos.Aplicacion
+@inject AltaEventoDeportivoUseCase AltaEventoUseCase
+@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject NavigationManager NavManager
+
+<h3>Crear Nuevo Evento Deportivo</h3>
+
+@if (!string.IsNullOrEmpty(errorMensaje))
+{
+    <div class="alert alert-danger">@errorMensaje</div>
+}
+
+<EditForm Model="evento" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="mb-3">
+        <label class="form-label">Nombre</label>
+        <InputText class="form-control" @bind-Value="evento.Nombre" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Descripción</label>
+        <InputText class="form-control" @bind-Value="evento.Descripcion" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Fecha y Hora de Inicio</label>
+        <InputDate class="form-control" @bind-Value="evento.FechaHoraInicio" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Duración (horas)</label>
+        <InputNumber class="form-control" @bind-Value="evento.DuracionHoras" />
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Cupo Máximo</label>
+        <InputNumber class="form-control" @bind-Value="evento.CupoMaximo" />
+    </div>
+
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-success">Guardar Evento</button>
+        <button type="button" class="btn btn-secondary ms-2" @onclick='() => NavManager.NavigateTo("/EventoAdmin")'>Cancelar</button>
+
+    </div>
+</EditForm>
+
+@code {
+    private EventoDeportivo evento = new();
+    private string? errorMensaje;
+
+    private void HandleSubmit()
+{
+    try
+    {
+        evento.ResponsableId = UsuarioActual.PersonaLogueada?.Id ?? 0;
+        AltaEventoUseCase.Ejecutar(evento, UsuarioActual.PersonaLogueada?.Id ?? 0);
+        NavManager.NavigateTo("/EventoAdmin");
+    }
+    catch (Exception ex)
+    {
+        errorMensaje = $"No se pudo guardar el evento: {ex.Message}";
+    }
+}
+
+}
