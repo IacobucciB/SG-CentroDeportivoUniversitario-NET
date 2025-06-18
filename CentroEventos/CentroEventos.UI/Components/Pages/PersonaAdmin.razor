@@ -10,14 +10,11 @@
     <span>Personas Registradas</span>
     @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
     {
-        <button class="btn btn-success" @onclick="() => mostrarFormularioCrear = true">
-            <i class="bi bi-plus-circle me-1"></i> + Agregar Persona
-        </button>
+        //<button class="btn btn-success" @onclick="() => mostrarFormularioCrear = true">
+          //  <i class="bi bi-plus-circle me-1"></i> + Agregar Persona
+        //</button>
     }
 </h3>
-
-
-
 
 <!-- TABLA -->
 @if (personas.Count == 0)
@@ -71,6 +68,8 @@ else
                                 OnConfirmado="Resetear" />
                             <button class="btn btn-danger btn-sm" @onclick="() => EliminarPersona(persona.Id)">Eliminar</button>
                            }
+                        @*If de permisos*@
+
                     </td>
                 </tr>
             }
@@ -81,8 +80,7 @@ else
 @code {
     private List<Persona> personas = new();
     private Persona nuevaPersona = new();
-    private bool mostrarFormularioCrear = false;
-    private string permisosInput = "";
+
     
 
     //Pruebas qcyo
@@ -102,46 +100,9 @@ else
         currentCount = 0;
     }
 
-
-
-
-
     protected override void OnInitialized()
     {
         personas = ListarPersonasUseCase.Ejecutar().ToList();
-    }
-
-
- //ARREGLAR EL GUARDAR PERSONA
-    private void GuardarPersona()
-    {
-        /*
-        nuevaPersona.ListaPermisos = permisosInput
-            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(p => p.Trim())
-            .ToList();
-
-        // Simulación - Acá deberías usar un UseCase como CrearPersonaUseCase.Ejecutar(nuevaPersona);
-        personas.Add(nuevaPersona);
-        Console.WriteLine($"Persona creada: {nuevaPersona.Nombre} {nuevaPersona.Apellido}");
-
-        // Reset y cerrar formulario
-        nuevaPersona = new();
-        permisosInput = "";
-        mostrarFormularioCrear = false;
-        */
-    }
-
-    private void CancelarCrearPersona()
-    {
-        nuevaPersona = new();
-        permisosInput = "";
-        mostrarFormularioCrear = false;
-    }
-
-    private void EditarPersona(int id)
-    {
-        Console.WriteLine($"EDITAR persona ID {id}");
     }
 
     private void EliminarPersona(int id)
