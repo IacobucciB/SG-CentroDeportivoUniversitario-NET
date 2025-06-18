@@ -1,7 +1,7 @@
 @page "/registro"
 @inject NavigationManager NavManager
-@inject ListarReservasUseCase ListarReservasUseCase
 @inject IServicioAutorizacion ServicioAutorizacion
+@inject IServicioHash Hashing
 @inject ServicioUsuarioActualProvisorio UsuarioActual
 @inject AltaPersonaUseCase AltaPersonaUseCase
 @rendermode InteractiveServer
@@ -71,11 +71,11 @@
                 Nombre = registroModel.Nombre,
                 Apellido = registroModel.Apellido,
                 Email = registroModel.Email,
-                Contrasena = registroModel.Password
+                Contrasena = Hashing.Hashear(registroModel.Password)
             };
 
             // El idUsuario puede ser 1 para registro público (o ajustar según lógica de permisos)
-            AltaPersonaUseCase.Ejecutar(persona, 1);
+            await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, 1));
 
             // Opcional: establecer usuario actual
             UsuarioActual.EstablecerPersona(persona);

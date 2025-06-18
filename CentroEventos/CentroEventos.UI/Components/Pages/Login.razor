@@ -1,8 +1,10 @@
 @page "/login"
 @inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject IServicioHash Hashing
 @inject NavigationManager NavManager
 @inject IServicioAutorizacion ServicioAutorizacion;
 @inject ListarPersonasUseCase ListarPersonasUseCase
+
 @rendermode InteractiveServer
 
 <PageTitle>SGE - Iniciar Sesión</PageTitle>
@@ -50,19 +52,27 @@
     {
         try
         {
-            var personas = ListarPersonasUseCase.Ejecutar();
+            // Esperar a que devuelva la lista de personas asi no se bloquea
+            var personas = await Task.Run(() => ListarPersonasUseCase.Ejecutar());
 
             var persona = personas.FirstOrDefault(p =>
-                p.Email.Equals(loginModel.Email, StringComparison.OrdinalIgnoreCase) &&
-                p.Contrasena == loginModel.Password);
-               
+                p.Email.Equals(loginModel.Email, StringComparison.OrdinalIgnoreCase));
 
             if (persona != null)
             {
-                UsuarioActual.EstablecerPersona(persona);
-                Console.WriteLine("Usuario autenticado: " + persona.Email);
+                // Verificar password
+                if (Hashing.Verificar(loginModel.Password ?? "", persona.Contrasena))
+                {
+                    UsuarioActual.EstablecerPersona(persona);
+                    Console.WriteLine("Usuario autenticado: " + persona.Email);
                 
-                NavManager.NavigateTo("/");
+                    NavManager.NavigateTo("/");
+                }
+                else
+                {
+                    Console.WriteLine("Problema al autenticar el hash");
+                }
+                
             }
             else
             {
