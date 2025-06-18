@@ -37,7 +37,7 @@ builder.Services.AddScoped<IRepositorioEventoDeportivo, RepositorioEventoDeporti
 
 // Servicios
 builder.Services.AddTransient<IServicioAutorizacion, ServicioAutorizacionProvisorio>();
-builder.Services.AddSingleton<ServicioUsuarioActualProvisorio>();
+builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddTransient<IServicioHash, ServicioHash>();
 
 // Inicializar DB SQLite
@@ -95,22 +95,26 @@ void MockData()
     var servicioAutorizacionSQL = new ServicioAutorizacionProvisorio();
     var servicioHashSQL = new ServicioHash();
     var altaPersonaSQL = new AltaPersonaUseCase(repoPersonaSQL, personaValidadorSQL, servicioAutorizacionSQL);
-    var personaSQL = new Persona
+    if (listarPersonasSQL.Ejecutar().Count == 0)
     {
-       // Id = "1",
-        DNI = "12345678",
-        Nombre = "Juan SQL",
-        Apellido = "Pérez SQL",
-        Email = "test@gmail.com",
-        Contrasena = servicioHashSQL.Hashear("aaa"),
-        ListaPermisos = new List<Permiso> {
-            Permiso.EventoAlta, Permiso.EventoModificacion, Permiso.EventoBaja,
-            Permiso.ReservaAlta, Permiso.ReservaModificacion, Permiso.ReservaBaja,
-            Permiso.UsuarioAlta, Permiso.UsuarioModificacion, Permiso.UsuarioBaja
-            }
-    };
-    altaPersonaSQL.Ejecutar(personaSQL, 1);
-    Console.WriteLine("Persona SQL guardada correctamente.");
+        var personaSQL = new Persona
+            {
+            // Id = "1",
+                DNI = "12345678",
+                Nombre = "Juan SQL",
+                Apellido = "Pérez SQL",
+                Email = "test@gmail.com",
+                Contrasena = servicioHashSQL.Hashear("aaa"),
+                ListaPermisos = new List<Permiso> {
+                    Permiso.EventoAlta, Permiso.EventoModificacion, Permiso.EventoBaja,
+                    Permiso.ReservaAlta, Permiso.ReservaModificacion, Permiso.ReservaBaja,
+                    Permiso.UsuarioAlta, Permiso.UsuarioModificacion, Permiso.UsuarioBaja
+                }
+            };
+        altaPersonaSQL.Ejecutar(personaSQL, 1);
+        Console.WriteLine("Persona SQL guardada correctamente.");
+    } 
+
 
     // Listar personas con SQLite
     
@@ -119,8 +123,5 @@ void MockData()
     {
         Console.WriteLine(p);
     }
-
-    var usuarioActual = new ServicioUsuarioActualProvisorio();
-    usuarioActual.EstablecerPersona(personaSQL);
 
 }

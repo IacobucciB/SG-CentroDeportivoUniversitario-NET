@@ -1,5 +1,5 @@
 @page "/login"
-@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject ServicioSesion UsuarioActual
 @inject IServicioHash Hashing
 @inject NavigationManager NavManager
 @inject IServicioAutorizacion ServicioAutorizacion;
@@ -63,7 +63,7 @@
                 // Verificar password
                 if (Hashing.Verificar(loginModel.Password ?? "", persona.Contrasena))
                 {
-                    UsuarioActual.EstablecerPersona(persona);
+                    UsuarioActual.IniciarSesion(persona);
                     Console.WriteLine("Usuario autenticado: " + persona.Email);
                 
                     NavManager.NavigateTo("/");

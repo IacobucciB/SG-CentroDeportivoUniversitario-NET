@@ -1,7 +1,9 @@
 @page "/EventoAdmin"
 @inject ListarEventosDeportivosUseCase ListarEventosUseCase
-@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject ServicioSesion UsuarioActual
 @inject IServicioAutorizacion ServicioAutorizacion
+
+@rendermode InteractiveServer
 
 @code {
     private List<EventoDeportivo> eventos = new();

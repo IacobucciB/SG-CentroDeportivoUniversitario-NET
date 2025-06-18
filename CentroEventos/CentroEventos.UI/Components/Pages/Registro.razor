@@ -2,7 +2,7 @@
 @inject NavigationManager NavManager
 @inject IServicioAutorizacion ServicioAutorizacion
 @inject IServicioHash Hashing
-@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject ServicioSesion UsuarioActual
 @inject AltaPersonaUseCase AltaPersonaUseCase
 @rendermode InteractiveServer
 
@@ -78,7 +78,7 @@
             await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, 1));
 
             // Opcional: establecer usuario actual
-            UsuarioActual.EstablecerPersona(persona);
+            UsuarioActual.IniciarSesion(persona);
 
             NavManager.NavigateTo("/");
         }

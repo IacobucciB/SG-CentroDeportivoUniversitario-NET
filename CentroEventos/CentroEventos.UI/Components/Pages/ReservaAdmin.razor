@@ -1,9 +1,10 @@
 @page "/reservaAdmin"
 @using CentroEventos.Aplicacion;
 @inject ListarReservasUseCase ListarReservasUseCase
+@inject ServicioSesion UsuarioActual
+@inject IServicioAutorizacion ServicioAutorizacion;  
 
- @inject ServicioUsuarioActualProvisorio UsuarioActual
-@inject IServicioAutorizacion ServicioAutorizacion;                       
+@rendermode InteractiveServer
 
 <h3 class="mt-4 mb-3">Reservas Registradas</h3>
 

@@ -1,7 +1,7 @@
 @page "/ModificarUsuario"
 @inject NavigationManager NavManager
 @inject IServicioAutorizacion ServicioAutorizacion
-@inject ServicioUsuarioActualProvisorio UsuarioActual
+@inject ServicioSesion UsuarioActual
 @inject IServicioHash Hashing
 @inject ModificarPersonaUseCase ModificarPersonaUseCase
 @rendermode InteractiveServer
@@ -85,23 +85,24 @@ else
     {
         try
         {
-            var usuario = UsuarioActual.PersonaLogueada!;
-            
-            if (usuario == null)
+
+            if (UsuarioActual.PersonaLogueada == null)
             {
                 NavManager.NavigateTo("/login");
                 return;
+
+            } else {
+                Console.WriteLine("El ID usuario sesión es: " + UsuarioActual.PersonaLogueada?.Id);
+
+                registroModel.Dni = UsuarioActual.PersonaLogueada!.DNI;
+                registroModel.Nombre = UsuarioActual.PersonaLogueada.Nombre;
+                registroModel.Apellido = UsuarioActual.PersonaLogueada.Apellido;
+                registroModel.Email = UsuarioActual.PersonaLogueada.Email;
+                // Password se deja vacío intencionalmente
+                
+                usuarioCargado = true;
             }
 
-            registroModel.Dni = usuario.DNI;
-            registroModel.Nombre = usuario.Nombre;
-            registroModel.Apellido = usuario.Apellido;
-            registroModel.Email = usuario.Email;
-            // Password se deja vacío intencionalmente
-
-            Console.WriteLine("El id del usuario es: ",usuario.Id);
-            
-            usuarioCargado = true;
         }
         catch (Exception ex)
         {
@@ -113,9 +114,8 @@ else
     {
         try
         {
-            var usuarioActual = UsuarioActual.PersonaLogueada;
             
-            if (usuarioActual == null)
+            if (UsuarioActual.PersonaLogueada == null)
             {
                 NavManager.NavigateTo("/login");
                 return;
@@ -137,10 +137,10 @@ else
                 Contrasena = Hashing.Hashear(registroModel.Password) // Siempre se hashea la nueva contraseña
             };
 
-            ModificarPersonaUseCase.Ejecutar(persona, usuarioActual.Id);
+            ModificarPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada.Id);
 
             // Actualizar usuario en sesión
-            UsuarioActual.EstablecerPersona(persona);
+            UsuarioActual.IniciarSesion(persona);
 
             successMessage = "Datos actualizados correctamente";
             errorMessage = null;
