@@ -13,7 +13,7 @@ builder.Services.AddRazorComponents()
 // Persona
 builder.Services.AddTransient<AltaPersonaUseCase>();
 builder.Services.AddTransient<BajaPersonaUseCase>();
-builder.Services.AddTransient<ModificarPersonasUseCase>();
+builder.Services.AddTransient<ModificarPersonaUseCase>();
 builder.Services.AddTransient<ListarPersonasUseCase>();
 // Reserva
 builder.Services.AddTransient<AltaReservaUseCase>();
@@ -38,6 +38,7 @@ builder.Services.AddScoped<IRepositorioEventoDeportivo, RepositorioEventoDeporti
 // Servicios
 builder.Services.AddTransient<IServicioAutorizacion, ServicioAutorizacionProvisorio>();
 builder.Services.AddSingleton<ServicioUsuarioActualProvisorio>();
+builder.Services.AddTransient<IServicioHash, ServicioHash>();
 
 // Inicializar DB SQLite
 CentroEventosSqlite.Inicializar();
@@ -92,6 +93,7 @@ void MockData()
     
     var personaValidadorSQL = new PersonaValidador();
     var servicioAutorizacionSQL = new ServicioAutorizacionProvisorio();
+    var servicioHashSQL = new ServicioHash();
     var altaPersonaSQL = new AltaPersonaUseCase(repoPersonaSQL, personaValidadorSQL, servicioAutorizacionSQL);
     var personaSQL = new Persona
     {
@@ -100,8 +102,12 @@ void MockData()
         Nombre = "Juan SQL",
         Apellido = "Pérez SQL",
         Email = "test@gmail.com",
-        Contrasena = "aaa",
-        ListaPermisos = new List<Permiso> { Permiso.EventoAlta, Permiso.EventoModificacion, Permiso.EventoBaja, Permiso.ReservaAlta, Permiso.ReservaModificacion, Permiso.ReservaBaja, Permiso.UsuarioAlta, Permiso.UsuarioModificacion, Permiso.UsuarioBaja }
+        Contrasena = servicioHashSQL.Hashear("aaa"),
+        ListaPermisos = new List<Permiso> {
+            Permiso.EventoAlta, Permiso.EventoModificacion, Permiso.EventoBaja,
+            Permiso.ReservaAlta, Permiso.ReservaModificacion, Permiso.ReservaBaja,
+            Permiso.UsuarioAlta, Permiso.UsuarioModificacion, Permiso.UsuarioBaja
+            }
     };
     altaPersonaSQL.Ejecutar(personaSQL, 1);
     Console.WriteLine("Persona SQL guardada correctamente.");
