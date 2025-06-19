@@ -23,6 +23,7 @@ builder.Services.AddTransient<BajaReservaUseCase>();
 builder.Services.AddTransient<ModificarReservaUseCase>();
 builder.Services.AddTransient<ListarReservasUseCase>();
 builder.Services.AddTransient<ListarAsistenciaAEventoUseCase>();
+builder.Services.AddTransient<ObtenerReservaPorIdUseCase>();
 
 // Evento Deportivo
 builder.Services.AddTransient<AltaEventoDeportivoUseCase>();
@@ -45,6 +46,8 @@ builder.Services.AddScoped<IRepositorioEventoDeportivo, RepositorioEventoDeporti
 builder.Services.AddTransient<IServicioAutorizacion, ServicioAutorizacionProvisorio>();
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddTransient<IServicioHash, ServicioHash>();
+
+builder.Services.AddTransient<ListarEventosConCupoDisponibleUseCase>();
 
 // Inicializar DB SQLite
 CentroEventosSqlite.Inicializar();

@@ -1,4 +1,5 @@
-﻿@inject ServicioSesion UsuarioActual
+﻿@rendermode InteractiveServer
+@inject ServicioSesion UsuarioActual
 @inject IServicioAutorizacion ServicioAutorizacion;
 
 <div class="top-row ps-3 navbar navbar-dark">
@@ -11,57 +12,48 @@
 
 <div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
     <nav class="flex-column">
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="/" Match="NavLinkMatch.All">
+            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Home
+        </NavLink>
+    </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="counter">
-                <span class="bi bi-plus-square-fill-nav-menu" aria-hidden="true"></span> Counter
-            </NavLink>
-        </div>
-
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="weather">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> Weather
-            </NavLink>
-        </div>
-
-
-         @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
-                {
-                    
-                }
-
-
-
-          @*Solo usuarios logeados*@
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/PersonaAdmin">
-                    <span class="bi bi-people-fill me-2"></span> Personas
-                </NavLink>
-            </div>
+  
         
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/EventoAdmin">
-                    <span class="bi bi-calendar-event-fill me-2"></span> Eventos
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/ReservaAdmin">
-                    <span class="bi bi-journal-bookmark-fill me-2"></span> Reservas
-                </NavLink>
-            </div>
-            <div class="nav-item px-3">
-                <NavLink class="nav-link" href="/ModificarUsuario">
-                    <span class="bi bi-people-fill me-2"></span> Modificar Datos
-                </NavLink>
-            </div>
-        
-    </nav>
-</div>
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="/PersonaAdmin">
+            <span class="bi bi-people-fill me-2"></span> Personas
+        </NavLink>
+    </div>
+
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="/EventoAdmin">
+            <span class="bi bi-calendar-event-fill me-2"></span> Eventos
+        </NavLink>
+    </div>
+
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="/EventosConCupo">
+            <span class="bi bi-calendar-check-fill me-2"></span> Eventos con cupo
+        </NavLink>
+    </div>
+
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="/ReservaAdmin">
+            <span class="bi bi-journal-bookmark-fill me-2"></span> Reservas
+        </NavLink>
+    </div>
+
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="/ModificarUsuario">
+            <span class="bi bi-people-fill me-2"></span> Modificar Datos
+        </NavLink>
+    </div>
+
+ 
+   </nav>
+</div>>
+
 
 
 

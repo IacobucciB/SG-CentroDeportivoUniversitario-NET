@@ -7,11 +7,13 @@
 @inject IServicioAutorizacion ServicioAutorizacion
 @inject NavigationManager NavManager
 
+
 <h3 class="d-flex justify-content-between align-items-center">
     <span>Eventos Registrados</span>
     @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
     {
-        <button class="btn btn-success" @onclick="@(() => NavManager.NavigateTo("/EventoCrear"))">
+        <button class="btn btn-primary btn-sm me-2" @onclick="@(() => NavManager.NavigateTo($"/EventoCrear?idEvento={-1}"))"> 
+        
             <i class="bi bi-plus-circle me-1"></i> + Crear Evento
         </button>
     }
@@ -60,17 +62,23 @@ else
                             +
                         </button>
                         </td>
-                        @if(ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id)){
+                        @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoModificacion)){
                             <td>
-                            <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarEvento(evento.Id)">
+                            <button class="btn btn-primary btn-sm me-2" @onclick="@(() => NavManager.NavigateTo($"/EventoCrear?idEvento={evento.Id}"))"> 
                                 Editar
                             </button>
+                            </td>
+                        }
+                         @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoBaja))
+                        {
+                            <td>
                             <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/EventoEliminar?idEvento={evento.Id}"))">
                                 Eliminar
                             </button>
                             </td>
-                        }  
-                    }
+                        }
+                        
+                    }  
                     
                 </tr>
             }

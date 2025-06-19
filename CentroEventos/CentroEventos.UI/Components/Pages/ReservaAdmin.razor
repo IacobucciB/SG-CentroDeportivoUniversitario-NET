@@ -3,7 +3,8 @@
 @rendermode InteractiveServer
 @inject ListarReservasUseCase ListarReservasUseCase
 @inject ServicioSesion UsuarioActual
-@inject IServicioAutorizacion ServicioAutorizacion;   
+@inject IServicioAutorizacion ServicioAutorizacion   
+
 @inject NavigationManager NavManager                    
 
 <h3 class="d-flex justify-content-between align-items-center">
@@ -19,7 +20,7 @@ else
     <table class="table table-striped table-bordered">
         <thead class="table-dark">
             <tr>
-                <th>ID</th>
+               @* <th>ID</th> *@
                 <th>Persona ID</th>
                 <th>Evento ID</th>
                 <th>Fecha de Reserva</th>
@@ -31,21 +32,32 @@ else
             @foreach (var reserva in reservas)
             {
                 <tr>
-                    <td>@reserva.Id</td>
+                   @* <td>@reserva.Id</td> *@
                     <td>@reserva.PersonaId</td>
                     <td>@reserva.EventoDeportivoId</td>
                     <td>@reserva.FechaAltaReserva.ToString("dd/MM/yyyy")</td>
                     <td>@reserva.EstadoAsistencia</td>
                     <td>
-                         
-                            <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarReserva(reserva.Id)">
+                    @if (UsuarioActual.PersonaLogueada?.Id != null)
+                    {
+                        
+                         @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoModificacion)){
+                            
+                            <button class="btn btn-primary btn-sm me-2" @onclick="@(() => NavManager.NavigateTo($"/ReservaEditar?idReserva={reserva.Id}"))">
                                 Editar
                             </button>
+                            
+                        }
+                         @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoBaja)){  
+                        
                             <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/ReservaEliminar?idReserva={reserva.Id}"))">
                                 Eliminar
                             </button>
-                        
-                    </td>
+                            
+                         }
+                         
+                    }
+                 </td>
                 </tr>
             }
         </tbody>
@@ -53,6 +65,8 @@ else
 }
 
 @code {
+
+     
     private List<Reserva> reservas = new();
 
     
@@ -64,7 +78,7 @@ else
     private void EditarReserva(int id)
     {
         // En el futuro: redirigir o abrir modal de edición
-        Console.WriteLine($"EDITAR reserva ID {id}");
+      //  Console.WriteLine($"EDITAR reserva ID {id}");
     }
 
 }

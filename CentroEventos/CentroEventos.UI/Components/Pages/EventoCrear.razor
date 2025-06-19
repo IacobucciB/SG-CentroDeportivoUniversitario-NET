@@ -5,9 +5,16 @@
 @inject AltaEventoDeportivoUseCase AltaEventoUseCase
 @inject ServicioSesion UsuarioActual
 @inject NavigationManager NavManager
+@inject ObtenerEventoDeportivoPorIdUseCase ObtenerEventoDeportivoPorId
+@inject ModificarEventoDeportivoUseCase ModificarEventoDeportivo
 
-<h3>Crear Nuevo Evento Deportivo</h3>
-
+@if (idEvento != -1) {
+    <h3>Editar Evento Deportivo</h3>
+}
+else {
+    <h3>Crear Nuevo Evento Deportivo</h3>
+    
+}
 @if (!string.IsNullOrEmpty(errorMensaje))
 {
     <div class="alert alert-danger">@errorMensaje</div>
@@ -52,19 +59,42 @@
 @code {
     private EventoDeportivo evento = new();
     private string? errorMensaje;
-
+     
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "idEvento")]
+    public int idEvento { get; set; }
     private void HandleSubmit()
-{
-    try
-    {
-        evento.ResponsableId = UsuarioActual.PersonaLogueada?.Id ?? 0;
-        AltaEventoUseCase.Ejecutar(evento, UsuarioActual.PersonaLogueada?.Id ?? 0);
-        NavManager.NavigateTo("/EventoAdmin");
-    }
-    catch (Exception ex)
-    {
-        errorMensaje = $"No se pudo guardar el evento: {ex.Message}";
-    }
+{      if(idEvento != -1)
+        try
+            {
+        
+                evento.ResponsableId = UsuarioActual.PersonaLogueada?.Id ?? 0;
+                ModificarEventoDeportivo.Ejecutar(evento, UsuarioActual.PersonaLogueada?.Id ?? 0);
+                NavManager.NavigateTo("/EventoAdmin");
+            }
+        catch (Exception ex)
+            {
+                errorMensaje = $"No se pudo guardar el evento: {ex.Message}";
+            }
+        else {
+            try
+            {
+        
+                evento.ResponsableId = UsuarioActual.PersonaLogueada?.Id ?? 0;
+                AltaEventoUseCase.Ejecutar(evento, UsuarioActual.PersonaLogueada?.Id ?? 0);
+                NavManager.NavigateTo("/EventoAdmin");
+            }
+        catch (Exception ex)
+            {
+                errorMensaje = $"No se pudo guardar el evento: {ex.Message}";
+            }
+
+        }    
 }
+ protected override void OnInitialized(){
+    if ( idEvento != -1 ){
+        evento = ObtenerEventoDeportivoPorId.Ejecutar(idEvento);
+    }
+ }
 
 }
