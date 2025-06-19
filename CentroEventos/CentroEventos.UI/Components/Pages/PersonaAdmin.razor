@@ -7,9 +7,10 @@
 @inject IServicioAutorizacion ServicioAutorizacion
 @inject NavigationManager NavManager
 
+
 <h3 class="d-flex justify-content-between align-items-center">
     <span>Personas Registradas</span>
-    @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+    @if (UsuarioActual.PersonaLogueada != null && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioAlta))
     {
         <button class="btn btn-success" @onclick="() => AgregarPersona()">Agregar Persona</button>
     }
@@ -59,17 +60,24 @@ else
                         }
                     </td>
                     <td>
-                        @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
-                        {
-                            <div class="btn-group" role="group">
+                        @if (UsuarioActual.PersonaLogueada != null && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioModificacion))
+                         {
+                           
                                 <button class="btn btn-primary btn-sm" @onclick="() => EditarPersona(persona.Id)">
                                     Editar
                                 </button>
+                           }   
+                         @if(UsuarioActual.PersonaLogueada != null && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioBaja))
+                        {  
+                            
                             <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/PersonaEliminar?idPersona={persona.Id}"))">
+                                
                                     Eliminar
-                                </button>
-                            </div>
-                        }
+                            </button>
+                            
+                         }  
+                         
+                    
                     </td>
                 </tr>
             }

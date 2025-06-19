@@ -217,9 +217,11 @@ else
 
     private async Task ProcesarRegistro(CentroEventos.Aplicacion.Persona persona)
     {
-        await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, 1));
-        UsuarioActual.IniciarSesion(persona);
-        NavManager.NavigateTo("/");
+        if(UsuarioActual.PersonaLogueada != null){
+            await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada.Id));
+            UsuarioActual.IniciarSesion(persona);
+            NavManager.NavigateTo("/");
+        }
     }
 
     private async Task ProcesarModificarPerfil(CentroEventos.Aplicacion.Persona persona)

@@ -10,7 +10,7 @@
 
 <h3 class="d-flex justify-content-between align-items-center">
     <span>Eventos Registrados</span>
-    @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+    @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id , Permiso.EventoAlta))
     {
         <button class="btn btn-primary btn-sm me-2" @onclick="@(() => NavManager.NavigateTo($"/EventoCrear?idEvento={-1}"))"> 
         
