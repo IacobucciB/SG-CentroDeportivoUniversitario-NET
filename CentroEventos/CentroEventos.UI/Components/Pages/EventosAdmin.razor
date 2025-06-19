@@ -3,6 +3,7 @@
 @using CentroEventos.Aplicacion
 @inject ListarEventosDeportivosUseCase ListarEventosUseCase
 @inject ServicioSesion UsuarioActual
+@inject IRepositorioEventoDeportivo RepositorioEvento
 @inject IServicioAutorizacion ServicioAutorizacion
 @inject NavigationManager NavManager
 
@@ -53,7 +54,7 @@ else
                     @if (UsuarioActual.PersonaLogueada?.Id != null)
                     {
                         <td>
-                        <button class="btn btn-primary btn-sm me-2tn" @onclick="@(() => NavManager.NavigateTo("/ReservaCrear"+$"/{evento.Id}"))">
+                        <button class="btn btn-primary btn-sm me-2tn" @onclick="@(() => NavManager.NavigateTo($"/ReservaCrear?idEvento={evento.Id}"))">
                          + Crear Reserva
                         </button>
                         </td>
@@ -84,6 +85,11 @@ else
         eventos = ListarEventosUseCase.Ejecutar().ToList();
     }
 
+    private void CrearReserva(int eventoId)
+    {
+        
+        NavManager.NavigateTo($"/ReservaCrear");
+    }
     private void EditarEvento(int eventoId)
     {
         Console.WriteLine($"Editar evento {eventoId}");
