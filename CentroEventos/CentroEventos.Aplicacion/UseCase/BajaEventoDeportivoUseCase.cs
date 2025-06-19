@@ -11,7 +11,7 @@ public class BajaEventoDeportivoUseCase(
             throw new FalloAutorizacionException("No tiene permiso para realizar esta acción.");
 
         // 2. Validar existencia del evento
-        var evento = repositorioEventoDeportivo.GetEventoDeportivo(idEvento);
+        var evento = repositorioEventoDeportivo.ObtenerEventoDeportivoPorId(idEvento);
         if (evento == null)
             throw new EntidadNotFoundException("El evento deportivo no existe.");
 

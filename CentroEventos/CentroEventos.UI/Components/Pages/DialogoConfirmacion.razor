@@ -37,11 +37,11 @@
 
         
             <h3>@Mensaje</h3>
-            <td>@persona.DNI</td>
-            <td>@persona.Nombre</td>
-            <td>@persona.Apellido</td>
-            <td>@persona.Email</td>
-            <td>@persona.Telefono</td>
+            <td>@persona?.DNI</td>
+            <td>@persona?.Nombre</td>
+            <td>@persona?.Apellido</td>
+            <td>@persona?.Email</td>
+            <td>@persona?.Telefono</td>
 
 
             <EditForm Model="@registroModel" OnValidSubmit="OnSubmit">
@@ -119,7 +119,7 @@
 
     public void Mostrar(int id)
     {
-        persona = RepositorioPersonaSQL.GetPersona(id);
+        persona = RepositorioPersonaSQL.ObtenerPersonaPorId(id);
         if (persona != null)
         {
             registroModel.Id = persona.Id;
