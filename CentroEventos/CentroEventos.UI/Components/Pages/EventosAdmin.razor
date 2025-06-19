@@ -9,10 +9,12 @@
 
 <h3 class="d-flex justify-content-between align-items-center">
     <span>Eventos Registrados</span>
-   
+    @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+    {
         <button class="btn btn-success" @onclick="@(() => NavManager.NavigateTo("/EventoCrear"))">
             <i class="bi bi-plus-circle me-1"></i> + Crear Evento
         </button>
+    }
 </h3>
 
 
@@ -32,9 +34,9 @@ else
                 <th>Duración (hs)</th>
                 <th>Cupo Máximo</th>
                 <th>Responsable ID</th>
-                @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
+                @if (UsuarioActual.PersonaLogueada?.Id != null)
                 {
-                    <th>Crear Reserva</th>
+                    <th>Reservar?</th>
                     <th>Acciones</th>
                 }
             </tr>
@@ -54,8 +56,8 @@ else
                     @if (UsuarioActual.PersonaLogueada?.Id != null)
                     {
                         <td>
-                        <button class="btn btn-primary btn-sm me-2tn" @onclick="@(() => NavManager.NavigateTo($"/ReservaCrear?idEvento={evento.Id}"))">
-                         + Crear Reserva
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/ReservaCrear?idEvento={evento.Id}"))">
+                            +
                         </button>
                         </td>
                         @if(ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id)){
