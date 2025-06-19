@@ -23,6 +23,7 @@ builder.Services.AddTransient<BajaReservaUseCase>();
 builder.Services.AddTransient<ModificarReservaUseCase>();
 builder.Services.AddTransient<ListarReservasUseCase>();
 builder.Services.AddTransient<ListarAsistenciaAEventoUseCase>();
+builder.Services.AddTransient<ObtenerReservaPorIdUseCase>();
 
 // Evento Deportivo
 builder.Services.AddTransient<AltaEventoDeportivoUseCase>();

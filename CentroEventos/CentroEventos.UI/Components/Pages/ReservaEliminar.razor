@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 @using CentroEventos.Aplicacion
 @inject BajaReservaUseCase BajareservaUseCase
+@inject ObtenerReservaPorIdUseCase ObtenerReservaUseCase
 @inject ServicioSesion UsuarioActual
 @inject NavigationManager NavManager
 
@@ -13,7 +14,13 @@
 {
     <div class="alert alert-danger">@errorMensaje</div>
 }
-
+@if (reserva != null)
+{
+        <p><strong>Nombre:</strong> @reserva.PersonaId</p>
+        <p><strong>Evento ID:</strong> @reserva.EventoDeportivoId</p>
+        <p><strong>Fecha de Reserva:</strong> @reserva.FechaAltaReserva.ToString("dd/MM/yyyy")</p>
+        <p><strong>Estado:</strong> @reserva.EstadoAsistencia</p>
+}
     <div class="d-flex justify-content-end">
         <button type="submit" class="btn btn-success" @onclick="@HandleSubmit">Confirmar</button> 
         <button type="button" class="btn btn-secondary ms-2" @onclick='() => NavManager.NavigateTo("/ReservaAdmin")'>Cancelar</button>
@@ -21,11 +28,13 @@
 
 @code {
     private string? errorMensaje;
+    private Reserva? reserva;
     [Parameter]
     [SupplyParameterFromQuery(Name = "idReserva")]
     public int idReserva { get; set; }
     protected override void OnInitialized()
     {
+        reserva = ObtenerReservaUseCase.Ejecutar(idReserva);
          
     }
 

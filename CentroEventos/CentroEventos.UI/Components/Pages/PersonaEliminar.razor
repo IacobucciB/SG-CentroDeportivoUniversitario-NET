@@ -3,6 +3,7 @@
 @rendermode InteractiveServer
 @using CentroEventos.Aplicacion
 @inject BajaPersonaUseCase BajapersonaUseCase
+@inject ObtenerPersonaPorIdUseCase ObtenerPersonaUseCase
 @inject ServicioSesion UsuarioActual
 @inject NavigationManager NavManager
 
@@ -13,6 +14,13 @@
 {
     <div class="alert alert-danger">@errorMensaje</div>
 }
+@if (persona != null)
+{
+    <p><strong>Nombre:</strong> @persona.Nombre</p>
+    <p><strong>Apellido:</strong> @persona.Apellido</p>
+    <p><strong>Email:</strong> @persona.Email</p>
+    <p><strong>Teléfono:</strong> @persona.Telefono</p>
+}
 
     <div class="d-flex justify-content-end">
         <button type="submit" class="btn btn-success" @onclick="@HandleSubmit">Confirmar</button> 
@@ -21,11 +29,13 @@
 
 @code {
     private string? errorMensaje;
+    private Persona? persona;
     [Parameter]
     [SupplyParameterFromQuery(Name = "idPersona")]
     public int idPersona { get; set; }
     protected override void OnInitialized()
     {
+        persona = ObtenerPersonaUseCase.Ejecutar(idPersona);
          
     }
 
