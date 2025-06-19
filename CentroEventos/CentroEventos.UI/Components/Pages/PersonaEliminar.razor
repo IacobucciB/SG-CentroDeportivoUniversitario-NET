@@ -1,0 +1,45 @@
+@page "/PersonaEliminar"
+
+@rendermode InteractiveServer
+@using CentroEventos.Aplicacion
+@inject BajaPersonaUseCase BajapersonaUseCase
+@inject ServicioSesion UsuarioActual
+@inject NavigationManager NavManager
+
+
+<h3>¿Está seguro de querer eliminar este Usuario?</h3>
+
+@if (!string.IsNullOrEmpty(errorMensaje))
+{
+    <div class="alert alert-danger">@errorMensaje</div>
+}
+
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-success" @onclick="@HandleSubmit">Confirmar</button> 
+        <button type="button" class="btn btn-secondary ms-2" @onclick='() => NavManager.NavigateTo("/PersonaAdmin")'>Cancelar</button>
+    </div>
+
+@code {
+    private string? errorMensaje;
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "idPersona")]
+    public int idPersona { get; set; }
+    protected override void OnInitialized()
+    {
+         
+    }
+
+    private void HandleSubmit()
+    {
+        try
+        {
+            BajapersonaUseCase.Ejecutar(idPersona, UsuarioActual.PersonaLogueada?.Id ?? 0);
+            NavManager.NavigateTo("/PersonaAdmin");
+        }
+        catch (Exception ex)
+        {
+            errorMensaje = $"No se pudo eliminar: {ex.Message}";
+        }
+    } 
+
+}
