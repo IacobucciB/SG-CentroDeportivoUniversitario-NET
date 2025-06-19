@@ -47,6 +47,8 @@ builder.Services.AddTransient<IServicioAutorizacion, ServicioAutorizacionProviso
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddTransient<IServicioHash, ServicioHash>();
 
+builder.Services.AddTransient<ListarEventosConCupoDisponibleUseCase>();
+
 // Inicializar DB SQLite
 CentroEventosSqlite.Inicializar();
 

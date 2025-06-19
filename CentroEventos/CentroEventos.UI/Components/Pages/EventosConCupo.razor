@@ -1,0 +1,57 @@
+@page "/EventosConCupo"
+@inject ListarEventosConCupoDisponibleUseCase ListarEventosConCupoDisponible
+@inject ServicioSesion UsuarioActual
+
+<h3>Eventos con Cupo Disponible</h3>
+
+@if (eventosConCupo.Count == 0)
+{
+    <div class="alert alert-info">No hay eventos con cupo disponible.</div>
+}
+else
+{
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Fecha y Hora</th>
+                <th>Duración (hs)</th>
+                <th>Cupo Máximo</th>
+                <th>Disponibles</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in eventosConCupo)
+            {
+                <tr>
+                    <td>@e.Nombre</td>
+                    <td>@e.Descripcion</td>
+                    <td>@e.FechaHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@e.DuracionHoras</td>
+                    <td>@e.CupoMaximo</td>
+                    <td>@(e.CupoMaximo - reservasPorEvento.GetValueOrDefault(e.Id, 0))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<EventoDeportivo> eventosConCupo = new();
+    private Dictionary<int, int> reservasPorEvento = new();
+
+    protected override void OnInitialized()
+    {
+        var idUsuario = UsuarioActual.PersonaLogueada?.Id ?? 0;
+        eventosConCupo = ListarEventosConCupoDisponible.Ejecutar(idUsuario);
+
+        // Extra: si querés mostrar los lugares disponibles:
+        foreach (var evento in eventosConCupo)
+        {
+            var reservas = evento.CupoMaximo - evento.CupoMaximo; // default 0
+            reservasPorEvento[evento.Id] = reservas;
+        }
+        
+    }
+}
