@@ -4,6 +4,7 @@
 @inject IServicioHash Hashing
 @inject ServicioSesion UsuarioActual
 @inject AltaPersonaUseCase AltaPersonaUseCase
+@inject RegistrarPersonaUseCase RegistrarPersonaUseCase
 @inject ModificarPersonaUseCase ModificarPersonaUseCase
 @rendermode InteractiveServer
 
@@ -219,6 +220,12 @@ else
     {
         if(UsuarioActual.PersonaLogueada != null){
             await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada.Id));
+            UsuarioActual.IniciarSesion(persona);
+            NavManager.NavigateTo("/");
+        }
+        else
+        {
+            await Task.Run(() => RegistrarPersonaUseCase.Ejecutar(persona));
             UsuarioActual.IniciarSesion(persona);
             NavManager.NavigateTo("/");
         }

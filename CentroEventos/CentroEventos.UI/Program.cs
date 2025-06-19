@@ -16,6 +16,7 @@ builder.Services.AddTransient<BajaPersonaUseCase>();
 builder.Services.AddTransient<ModificarPersonaUseCase>();
 builder.Services.AddTransient<ListarPersonasUseCase>();
 builder.Services.AddTransient<ObtenerPersonaPorIdUseCase>();
+builder.Services.AddTransient<RegistrarPersonaUseCase>();
 
 // Reserva
 builder.Services.AddTransient<AltaReservaUseCase>();
@@ -31,6 +32,7 @@ builder.Services.AddTransient<BajaEventoDeportivoUseCase>();
 builder.Services.AddTransient<ModificarEventoDeportivoUseCase>();
 builder.Services.AddTransient<ListarEventosDeportivosUseCase>();
 builder.Services.AddTransient<ObtenerEventoDeportivoPorIdUseCase>();
+builder.Services.AddTransient<ListarEventosConCupoDisponibleUseCase>();
 
 // Validadores
 builder.Services.AddTransient<PersonaValidador>();
@@ -47,7 +49,7 @@ builder.Services.AddTransient<IServicioAutorizacion, ServicioAutorizacionProviso
 builder.Services.AddScoped<ServicioSesion>();
 builder.Services.AddTransient<IServicioHash, ServicioHash>();
 
-builder.Services.AddTransient<ListarEventosConCupoDisponibleUseCase>();
+
 
 // Inicializar DB SQLite
 CentroEventosSqlite.Inicializar();
