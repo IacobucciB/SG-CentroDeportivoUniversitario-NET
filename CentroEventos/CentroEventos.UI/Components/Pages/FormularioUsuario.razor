@@ -1,8 +1,4 @@
-@page "/Registro"
-@page "/ModificarUsuario"
-@page "/ModificarUsuario/{IdUsuario:int}"
-@page "/admin/usuarios/agregar"
-@page "/admin/usuarios/modificar/{IdUsuario:int}"
+@page "/LOL"
 @inject NavigationManager NavManager
 @inject IServicioAutorizacion ServicioAutorizacion
 @inject IServicioHash Hashing
@@ -125,7 +121,8 @@ else
 }
 
 @code {
-    [Parameter] public int? IdUsuario { get; set; }
+    [SupplyParameterFromQuery(Name = "idPersona")]
+    public int? IdUsuario { get; set; }
 
     private RegistroModel registroModel = new();
     private string? errorMessage;
@@ -143,9 +140,15 @@ else
 
     protected override async Task OnInitializedAsync()
     {
+        // Verificamos si la persona está cargada
+        if (UsuarioActual.PersonaLogueada == null)
+        {
+            NavManager.NavigateTo("/login");
+            return;
+        }
+
         await DeterminarTipoOperacion();
         await CargarDatos();
-        StateHasChanged(); // Forzar actualización de la UI
     }
 
     private async Task DeterminarTipoOperacion()
@@ -153,53 +156,86 @@ else
         var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
         var path = uri.AbsolutePath.ToLower();
 
-        if (path.Contains("/registro"))
+        if (path.Contains("/admin/usuarios/agregar"))
         {
-            tipoOperacion = TipoOperacion.Registro;
-        }
-        else if (path.Contains("/admin/usuarios/agregar"))
-        {
+            // Verificar que tenga sesión y permiso de alta de usuarios
+            if (UsuarioActual.PersonaLogueada == null)
+            {
+                NavManager.NavigateTo("/login");
+                return;
+            }
+            
+            if (!ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioAlta))
+            {
+                NavManager.NavigateTo("/");
+                return;
+            }
+            
             tipoOperacion = TipoOperacion.AgregarUsuarioAdmin;
         }
-        else if (path.Contains("/admin/usuarios/modificar") && IdUsuario.HasValue)
+        else if (path.Contains("/admin/usuarios/modificar"))
         {
+            // Verificar que tenga sesión y permiso de modificación de usuarios
+            if (UsuarioActual.PersonaLogueada == null)
+            {
+                NavManager.NavigateTo("/login");
+                return;
+            }
+            
+            if (!ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioModificacion))
+            {
+                NavManager.NavigateTo("/");
+                return;
+            }
+            
             tipoOperacion = TipoOperacion.ModificarUsuarioAdmin;
+        }
+        else if (path.Contains("/registro"))
+        {
+            tipoOperacion = TipoOperacion.Registro;
         }
         else if (path.Contains("/modificarusuario"))
         {
             if (IdUsuario.HasValue)
             {
+                // Verificar que tenga sesión y permiso de modificación de usuarios
+                if (UsuarioActual.PersonaLogueada is null)
+                {
+                    NavManager.NavigateTo("/login");
+                    return;
+                }
+                
+                if (!ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioModificacion))
+                {
+                    Console.WriteLine("No tienes permiso agggg");
+                    NavManager.NavigateTo("/");
+                    return;
+                }
+                
                 tipoOperacion = TipoOperacion.ModificarUsuarioAdmin;
             }
             else
             {
+                // Modificar perfil propio - solo requiere estar logueado
+                if (UsuarioActual.PersonaLogueada == null)
+                {
+                    NavManager.NavigateTo("/login");
+                    return;
+                }
+                
                 tipoOperacion = TipoOperacion.ModificarPerfil;
             }
         }
         else
         {
-            tipoOperacion = TipoOperacion.Registro; // Por defecto
+            // Valor por defecto más seguro
+            tipoOperacion = TipoOperacion.Registro;
         }
     }
-
     private async Task CargarDatos()
     {
         try
         {
-            // Verificar autenticación según el tipo de operación
-            if (RequiereAutenticacion() && UsuarioActual.PersonaLogueada == null)
-            {
-                NavManager.NavigateTo("/login");
-                return;
-            }
-
-            // Verificar permisos de administrador si es necesario
-            if (RequierePermisos() && !TienePermisosNecesarios())
-            {
-                NavManager.NavigateTo("/acceso-denegado");
-                return;
-            }
-
             switch (tipoOperacion)
             {
                 case TipoOperacion.Registro:
@@ -224,7 +260,6 @@ else
             datosListos = true;
         }
     }
-
     private void CargarDatosUsuarioActual()
     {
         if (UsuarioActual.PersonaLogueada != null)
@@ -234,7 +269,7 @@ else
             registroModel.Apellido = UsuarioActual.PersonaLogueada.Apellido;
             registroModel.Email = UsuarioActual.PersonaLogueada.Email;
             registroModel.Telefono = UsuarioActual.PersonaLogueada.Telefono ?? "";
-            // No cargamos la contraseña por seguridad
+            // No cargamos la contraseña por esta hasheada por lo que debera cambiar si o si la contraseña
             registroModel.Password = "";
             registroModel.ConfirmPassword = "";
         }
@@ -252,7 +287,7 @@ else
                 registroModel.Apellido = persona.Apellido;
                 registroModel.Email = persona.Email;
                 registroModel.Telefono = persona.Telefono ?? "";
-                // No cargamos la contraseña por seguridad
+                // No cargamos la contraseña por esta hasheada por lo que debera cambiar si o si la contraseña x2
                 registroModel.Password = "";
                 registroModel.ConfirmPassword = "";
                 
@@ -461,11 +496,12 @@ else
     {
         if (tipoOperacion == TipoOperacion.AgregarUsuarioAdmin || tipoOperacion == TipoOperacion.ModificarUsuarioAdmin)
         {
-            NavManager.NavigateTo("/admin/usuarios");
+            // Usar NavigateTo con forceLoad: false para mantener la sesión
+            NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
         }
         else
         {
-            NavManager.NavigateTo("/");
+            NavManager.NavigateTo("/", forceLoad: false);
         }
     }
 

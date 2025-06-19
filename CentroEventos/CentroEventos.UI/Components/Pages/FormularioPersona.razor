@@ -1,0 +1,282 @@
+@page "/Registro"
+@page "/ModificarUsuario"
+@inject NavigationManager NavManager
+@inject IServicioHash Hashing
+@inject ServicioSesion UsuarioActual
+@inject AltaPersonaUseCase AltaPersonaUseCase
+@inject ModificarPersonaUseCase ModificarPersonaUseCase
+@rendermode InteractiveServer
+
+<PageTitle>SGE - @GetPageTitle()</PageTitle>
+
+@if (datosListos)
+{
+    <div class="d-flex justify-content-center">
+        <div style="width: 400px;">
+            <h3 class="text-center mt-4">@GetPageTitle()</h3>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success">@successMessage</div>
+            }
+
+            <EditForm Model="@registroModel" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">DNI</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Dni" />
+                    <ValidationMessage For="@(() => registroModel.Dni)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Nombre" />
+                    <ValidationMessage For="@(() => registroModel.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Apellido</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Apellido" />
+                    <ValidationMessage For="@(() => registroModel.Apellido)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Correo Electrónico</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Email" />
+                    <ValidationMessage For="@(() => registroModel.Email)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Telefono" />
+                    <ValidationMessage For="@(() => registroModel.Telefono)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">@GetPasswordLabel()</label>
+                    <InputText type="password" class="form-control" @bind-Value="registroModel.Password" />
+                    <ValidationMessage For="@(() => registroModel.Password)" />
+                </div>
+
+                @if (!esModificarPerfil)
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar Contraseña</label>
+                        <InputText type="password" class="form-control" @bind-Value="registroModel.ConfirmPassword" />
+                        <ValidationMessage For="@(() => registroModel.ConfirmPassword)" />
+                    </div>
+                }
+
+                <button type="submit" class="btn @GetButtonClass() w-100">@GetButtonText()</button>
+            </EditForm>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center mt-5">
+        <p>@GetLoadingMessage()</p>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "idPersona")]
+    public int? IdUsuario { get; set; }
+
+    private RegistroModel registroModel = new();
+    private string? errorMessage;
+    private string? successMessage;
+    private bool datosListos = false;
+    private bool esModificarPerfil = false;
+
+    protected override void OnInitialized()
+    {
+        DeterminarTipoOperacion();
+        CargarDatos();
+    }
+
+    private async Task DeterminarTipoOperacion()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        var path = uri.AbsolutePath.ToLower();
+
+        if (path.Contains("/modificarusuario"))
+        {
+            // Para modificar perfil se requiere estar logueado
+            if (UsuarioActual.PersonaLogueada == null)
+            {
+                NavManager.NavigateTo("/login");
+                return;
+            }
+
+            // Si se pasa un ID y es diferente al usuario actual, redirigir (seguridad)
+            if (IdUsuario.HasValue && IdUsuario.Value != UsuarioActual.PersonaLogueada.Id)
+            {
+                NavManager.NavigateTo("/");
+                return;
+            }
+
+            esModificarPerfil = true;
+        }
+        else if (path.Contains("/registro"))
+        {
+            // Para registrarse NO debe estar logueado
+            if (UsuarioActual.PersonaLogueada != null)
+            {
+                NavManager.NavigateTo("/");
+                return;
+            }
+            
+            esModificarPerfil = false;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private async Task CargarDatos()
+    {
+        try
+        {
+            if (esModificarPerfil)
+            {
+                CargarDatosUsuarioActual();
+            }
+            // Para registro no hay datos que cargar
+
+            datosListos = true;
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los datos: {ex.Message}";
+            datosListos = true;
+        }
+
+        await Task.CompletedTask;
+    }
+
+    private void CargarDatosUsuarioActual()
+    {
+        if (UsuarioActual.PersonaLogueada != null)
+        {
+            registroModel.Dni = UsuarioActual.PersonaLogueada.DNI;
+            registroModel.Nombre = UsuarioActual.PersonaLogueada.Nombre;
+            registroModel.Apellido = UsuarioActual.PersonaLogueada.Apellido;
+            registroModel.Email = UsuarioActual.PersonaLogueada.Email;
+            registroModel.Telefono = UsuarioActual.PersonaLogueada.Telefono ?? "";
+            registroModel.Password = "";
+            registroModel.ConfirmPassword = "";
+        }
+    }
+
+    private async Task OnSubmit()
+    {
+        try
+        {
+            if (!esModificarPerfil && registroModel.Password != registroModel.ConfirmPassword)
+            {
+                errorMessage = "Las contraseñas no coinciden";
+                return;
+            }
+
+            var persona = new CentroEventos.Aplicacion.Persona
+            {
+                DNI = registroModel.Dni,
+                Nombre = registroModel.Nombre,
+                Apellido = registroModel.Apellido,
+                Email = registroModel.Email,
+                Telefono = registroModel.Telefono
+            };
+
+            // Solo hashear la contraseña si se proporcionó una nueva
+            if (!string.IsNullOrEmpty(registroModel.Password))
+            {
+                persona.Contrasena = Hashing.Hashear(registroModel.Password);
+            }
+
+            if (esModificarPerfil)
+            {
+                await ProcesarModificarPerfil(persona);
+            }
+            else
+            {
+                await ProcesarRegistro(persona);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            successMessage = null;
+        }
+    }
+
+    private async Task ProcesarRegistro(CentroEventos.Aplicacion.Persona persona)
+    {
+        await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, 1));
+        UsuarioActual.IniciarSesion(persona);
+        NavManager.NavigateTo("/");
+    }
+
+    private async Task ProcesarModificarPerfil(CentroEventos.Aplicacion.Persona persona)
+    {
+        if (UsuarioActual.PersonaLogueada == null)
+        {
+            NavManager.NavigateTo("/login");
+            return;
+        }
+
+        persona.Id = UsuarioActual.PersonaLogueada.Id;
+        
+        // Si no se proporcionó nueva contraseña, mantener la actual
+        if (string.IsNullOrEmpty(registroModel.Password))
+        {
+            persona.Contrasena = UsuarioActual.PersonaLogueada.Contrasena;
+        }
+        
+        await Task.Run(() => ModificarPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada.Id));
+        UsuarioActual.IniciarSesion(persona);
+        successMessage = "Datos actualizados correctamente";
+        errorMessage = null;
+    }
+
+    private string GetPageTitle()
+    {
+        return esModificarPerfil ? "Modificar datos de la cuenta" : "Registro de Usuario";
+    }
+
+    private string GetPasswordLabel()
+    {
+        return esModificarPerfil ? "Nueva Contraseña" : "Contraseña";
+    }
+
+    private string GetButtonText()
+    {
+        return esModificarPerfil ? "Guardar cambios" : "Registrarse";
+    }
+
+    private string GetButtonClass()
+    {
+        return esModificarPerfil ? "btn-primary" : "btn-success";
+    }
+
+    private string GetLoadingMessage()
+    {
+        return esModificarPerfil ? "Cargando datos del usuario..." : "Preparando formulario...";
+    }
+
+    private class RegistroModel
+    {
+        public string Dni { get; set; } = "";
+        public string Nombre { get; set; } = "";
+        public string Apellido { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Telefono { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+    }
+}

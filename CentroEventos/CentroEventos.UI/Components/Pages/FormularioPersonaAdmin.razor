@@ -1,0 +1,389 @@
+@page "/Admin/Usuarios/Agregar"
+@page "/Admin/Usuarios/Modificar"
+@inject NavigationManager NavManager
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject IServicioHash Hashing
+@inject ServicioSesion UsuarioActual
+@inject AltaPersonaUseCase AltaPersonaUseCase
+@inject ModificarPersonaUseCase ModificarPersonaUseCase
+@inject ObtenerPersonaPorIdUseCase ObtenerPersonaPorIdUseCase
+@rendermode InteractiveServer
+
+<PageTitle>SGE - @GetPageTitle()</PageTitle>
+
+@if (datosListos)
+{
+    <div class="d-flex justify-content-center">
+        <div style="width: 400px;">
+            <h3 class="text-center mt-4">@GetPageTitle()</h3>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success">@successMessage</div>
+            }
+
+            <EditForm Model="@registroModel" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">DNI</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Dni" />
+                    <ValidationMessage For="@(() => registroModel.Dni)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Nombre" />
+                    <ValidationMessage For="@(() => registroModel.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Apellido</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Apellido" />
+                    <ValidationMessage For="@(() => registroModel.Apellido)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Correo Electrónico</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Email" />
+                    <ValidationMessage For="@(() => registroModel.Email)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <InputText class="form-control" @bind-Value="registroModel.Telefono" />
+                    <ValidationMessage For="@(() => registroModel.Telefono)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">@GetPasswordLabel()</label>
+                    <InputText type="password" class="form-control" @bind-Value="registroModel.Password" />
+                    <ValidationMessage For="@(() => registroModel.Password)" />
+                    @if (esModificacion)
+                    {
+                        <small class="form-text text-muted">Deja en blanco si no deseas cambiar la contraseña</small>
+                    }
+                </div>
+
+                @if (!esModificacion)
+                {
+                    <div class="mb-3">
+                        <label class="form-label">Confirmar Contraseña</label>
+                        <InputText type="password" class="form-control" @bind-Value="registroModel.ConfirmPassword" />
+                        <ValidationMessage For="@(() => registroModel.ConfirmPassword)" />
+                    </div>
+                }
+
+                <div class="mb-3">
+                    <label class="form-label">Permisos</label>
+                    <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                        @foreach (var permiso in Enum.GetValues<Permiso>())
+                        {
+                            <div class="form-check mb-2">
+                                <input class="form-check-input" 
+                                       type="checkbox" 
+                                       id="permiso_@permiso" 
+                                       @onchange="@((e) => OnPermisoChanged(permiso, (bool)e.Value!))" 
+                                       checked="@registroModel.PermisosSeleccionados.Contains(permiso)" />
+                                <label class="form-check-label" for="permiso_@permiso">
+                                    @GetPermisoDisplayName(permiso)
+                                </label>
+                            </div>
+                        }
+                    </div>
+                    <small class="form-text text-muted">
+                        Selecciona los permisos que tendrá el usuario
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">@GetButtonText()</button>
+            </EditForm>
+
+            <button type="button" class="btn btn-secondary w-100 mt-2" @onclick="Cancelar">Cancelar</button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center mt-5">
+        <p>@GetLoadingMessage()</p>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "idPersona")]
+    public int? IdUsuario { get; set; }
+
+    private RegistroModel registroModel = new();
+    private string? errorMessage;
+    private string? successMessage;
+    private bool datosListos = false;
+    private bool esModificacion = false;
+
+    protected override void OnInitialized()
+    {
+        // Determinar operación (síncrono)
+        DeterminarTipoOperacion();
+        
+        // Cargar datos (inicia async pero no esperamos aquí)
+        CargarDatos();
+    }
+
+    private async Task DeterminarTipoOperacion()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        var path = uri.AbsolutePath.ToLower();
+
+        esModificacion = path.Contains("/admin/usuarios/modificar");
+        
+        var permisoRequerido = esModificacion 
+            ? Permiso.UsuarioModificacion 
+            : Permiso.UsuarioAlta;
+            
+        if (!ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, permisoRequerido))
+        {
+            NavManager.NavigateTo("/");
+        }
+    }
+
+    private async Task CargarDatos()
+    {
+        try
+        {
+            if (esModificacion && IdUsuario.HasValue)
+            {
+                await CargarDatosUsuarioEspecifico();
+            }
+            
+            datosListos = true;
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los datos: {ex.Message}";
+            datosListos = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task CargarDatosUsuarioEspecifico()
+    {
+        if (IdUsuario.HasValue)
+        {
+            var persona = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
+            if (persona != null)
+            {
+                registroModel.Dni = persona.DNI;
+                registroModel.Nombre = persona.Nombre;
+                registroModel.Apellido = persona.Apellido;
+                registroModel.Email = persona.Email;
+                registroModel.Telefono = persona.Telefono ?? "";
+                registroModel.Password = "";
+                registroModel.ConfirmPassword = "";
+                
+                // Cargar permisos del usuario
+                await CargarPermisosUsuario(IdUsuario.Value);
+            }
+            else
+            {
+                throw new Exception("Usuario no encontrado");
+            }
+        }
+    }
+
+    private async Task CargarPermisosUsuario(int idUsuario)
+    {
+        // Implementar carga de permisos según tu servicio
+        registroModel.PermisosSeleccionados.Clear();
+        foreach (var permiso in Enum.GetValues<Permiso>())
+        {
+            if (ServicioAutorizacion.PoseeElPermiso(idUsuario, permiso))
+            {
+                registroModel.PermisosSeleccionados.Add(permiso);
+            }
+        }
+        await Task.CompletedTask;
+    }
+
+    private void OnPermisoChanged(Permiso permiso, bool isChecked)
+    {
+        if (isChecked)
+        {
+            if (!registroModel.PermisosSeleccionados.Contains(permiso))
+            {
+                registroModel.PermisosSeleccionados.Add(permiso);
+            }
+        }
+        else
+        {
+            registroModel.PermisosSeleccionados.Remove(permiso);
+        }
+    }
+
+    private string GetPermisoDisplayName(Permiso permiso)
+    {
+        return permiso switch
+        {
+            Permiso.EventoAlta => "Crear Eventos",
+            Permiso.EventoModificacion => "Modificar Eventos",
+            Permiso.EventoBaja => "Eliminar Eventos",
+            Permiso.ReservaAlta => "Crear Reservas",
+            Permiso.ReservaModificacion => "Modificar Reservas",
+            Permiso.ReservaBaja => "Eliminar Reservas",
+            Permiso.UsuarioAlta => "Crear Usuarios",
+            Permiso.UsuarioModificacion => "Modificar Usuarios",
+            Permiso.UsuarioBaja => "Eliminar Usuarios",
+            _ => permiso.ToString()
+        };
+    }
+
+    private async Task OnSubmit()
+    {
+        try
+        {
+            // Verificar que la sesión sigue activa
+            if (UsuarioActual.PersonaLogueada == null)
+            {
+                NavManager.NavigateTo("/login");
+                return;
+            }
+
+            if (!esModificacion && registroModel.Password != registroModel.ConfirmPassword)
+            {
+                errorMessage = "Las contraseñas no coinciden";
+                return;
+            }
+
+            var persona = new CentroEventos.Aplicacion.Persona
+            {
+                DNI = registroModel.Dni,
+                Nombre = registroModel.Nombre,
+                Apellido = registroModel.Apellido,
+                Email = registroModel.Email,
+                Telefono = registroModel.Telefono
+            };
+
+            // Solo hashear la contraseña si se proporcionó una nueva
+            if (!string.IsNullOrEmpty(registroModel.Password))
+            {
+                persona.Contrasena = Hashing.Hashear(registroModel.Password);
+            }
+
+            if (esModificacion)
+            {
+                await ProcesarModificarUsuario(persona);
+            }
+            else
+            {
+                await ProcesarAgregarUsuario(persona);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            successMessage = null;
+        }
+    }
+
+    private async Task ProcesarAgregarUsuario(CentroEventos.Aplicacion.Persona persona)
+    {
+        await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
+        
+        // Asignar permisos seleccionados
+        await AsignarPermisosUsuario(persona.Id);
+        
+        successMessage = "Usuario agregado correctamente";
+        errorMessage = null;
+        registroModel = new RegistroModel(); // Limpiar formulario
+    }
+
+    private async Task ProcesarModificarUsuario(CentroEventos.Aplicacion.Persona persona)
+    {
+        if (!IdUsuario.HasValue)
+        {
+            throw new Exception("ID de usuario no válido");
+        }
+
+        persona.Id = IdUsuario.Value;
+        
+        // Si no se proporcionó nueva contraseña, obtener la actual del usuario
+        if (string.IsNullOrEmpty(registroModel.Password))
+        {
+            var usuarioExistente = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
+            if (usuarioExistente != null)
+            {
+                persona.Contrasena = usuarioExistente.Contrasena;
+            }
+        }
+        
+        await Task.Run(() => ModificarPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
+        
+        // Actualizar permisos
+        await AsignarPermisosUsuario(persona.Id);
+        
+        successMessage = "Usuario modificado correctamente";
+        errorMessage = null;
+    }
+
+    private async Task AsignarPermisosUsuario(int idUsuario)
+    {
+        // Implementar asignación de permisos según tu servicio
+        // Ejemplo:
+        /*
+        // Primero quitar todos los permisos existentes
+        foreach (var permiso in Enum.GetValues<Permiso>())
+        {
+            ServicioAutorizacion.QuitarPermiso(idUsuario, permiso);
+        }
+        
+        // Luego asignar los permisos seleccionados
+        foreach (var permiso in registroModel.PermisosSeleccionados)
+        {
+            ServicioAutorizacion.AsignarPermiso(idUsuario, permiso);
+        }
+        */
+        await Task.CompletedTask;
+    }
+
+    private void Cancelar()
+    {
+        NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
+    }
+
+    private string GetPageTitle()
+    {
+        return esModificacion ? "Modificar Usuario" : "Agregar Usuario";
+    }
+
+    private string GetPasswordLabel()
+    {
+        return esModificacion ? "Nueva Contraseña" : "Contraseña";
+    }
+
+    private string GetButtonText()
+    {
+        return esModificacion ? "Modificar Usuario" : "Agregar Usuario";
+    }
+
+    private string GetLoadingMessage()
+    {
+        return esModificacion ? "Cargando datos del usuario..." : "Preparando formulario...";
+    }
+
+    private class RegistroModel
+    {
+        public string Dni { get; set; } = "";
+        public string Nombre { get; set; } = "";
+        public string Apellido { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Telefono { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+        public HashSet<Permiso> PermisosSeleccionados { get; set; } = new();
+    }
+}
