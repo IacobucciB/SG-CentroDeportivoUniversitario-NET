@@ -33,6 +33,7 @@ else
                 <th>Responsable ID</th>
                 @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
                 {
+                    <th>Crear Reserva</th>
                     <th>Acciones</th>
                 }
             </tr>
@@ -51,9 +52,11 @@ else
                     
                     @if (UsuarioActual.PersonaLogueada?.Id != null)
                     {
-                        <button class="btn btn-primary" @onclick="@(() => NavManager.NavigateTo("/ReservaCrear"+$"/{evento.Id}"))">
+                        <td>
+                        <button class="btn btn-primary btn-sm me-2tn" @onclick="@(() => NavManager.NavigateTo("/ReservaCrear"+$"/{evento.Id}"))">
                          + Crear Reserva
                         </button>
+                        </td>
                         @if(ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id)){
                             <td>
                             <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarEvento(evento.Id)">
