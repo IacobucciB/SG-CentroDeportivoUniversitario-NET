@@ -8,5 +8,5 @@ public interface IRepositorioPersona
 
     List<Persona> ListarPersonas();
 
-    Persona? GetPersona(int id);
+    Persona? ObtenerPersonaPorId(int id);
 }

@@ -34,7 +34,7 @@ namespace CentroEventos.Repositorios
             return CentroEventosContext.EventosDeportivos.ToList();
         }
 
-        public EventoDeportivo? GetEventoDeportivo(int id)
+        public EventoDeportivo? ObtenerEventoDeportivoPorId(int id)
         {
             using var CentroEventosContext = new CentroEventosContext();
             return CentroEventosContext.EventosDeportivos.Find(id);
