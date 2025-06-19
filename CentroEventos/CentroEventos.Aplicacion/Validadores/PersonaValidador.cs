@@ -18,6 +18,11 @@ public class PersonaValidador
         {
             mensajeError = "El email no puede estar vacío.";
         }
+        if (string.IsNullOrWhiteSpace(persona.Contrasena))
+        {
+            mensajeError = "La contrasena no puede estar vacia.";
+        }
+
         return (mensajeError == "");
     }
 }

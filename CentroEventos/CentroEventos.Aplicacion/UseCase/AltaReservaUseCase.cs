@@ -13,11 +13,11 @@ public class AltaReservaUseCase(
             throw new FalloAutorizacionException("No tiene permiso para realizar esta acción.");
 
         // 2. Validar existencia de Persona y Evento
-        var persona = repositorioPersona.GetPersona(datosReserva.PersonaId);
+        var persona = repositorioPersona.ObtenerPersonaPorId(datosReserva.PersonaId);
         if (persona == null)
             throw new EntidadNotFoundException("La persona no existe.");
 
-        var evento = repositorioEventoDeportivo.GetEventoDeportivo(datosReserva.EventoDeportivoId);
+        var evento = repositorioEventoDeportivo.ObtenerEventoDeportivoPorId(datosReserva.EventoDeportivoId);
         if (evento == null)
             throw new EntidadNotFoundException("El evento deportivo no existe.");
 

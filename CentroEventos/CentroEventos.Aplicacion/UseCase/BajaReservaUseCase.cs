@@ -6,7 +6,7 @@ IServicioAutorizacion servicioAutorizacion)
     public void Ejecutar(int id, int idUsuario)
     {
         // 1. Autorización
-        if (!servicioAutorizacion.PoseeElPermiso(idUsuario, Permiso.EventoBaja))
+        if (!servicioAutorizacion.PoseeElPermiso(idUsuario, Permiso.ReservaBaja))
             throw new FalloAutorizacionException("No tiene permiso para realizar esta acción.");
         // 2. Validar existencia de la reserva
         var reserva = repositorioReserva.ObtenerReservaPorId(id);

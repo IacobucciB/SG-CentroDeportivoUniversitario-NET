@@ -82,7 +82,7 @@ namespace CentroEventos.Repositorios
                 return personas;
             }
 
-            public Persona? GetPersona(int id)
+            public Persona? ObtenerPersonaPorId(int id)
             {
                 return ListarPersonas().FirstOrDefault(p => p.Id == id);
             }

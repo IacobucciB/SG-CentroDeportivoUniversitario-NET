@@ -5,12 +5,13 @@
 @inject ListarPersonasUseCase ListarPersonasUseCase
 @inject ServicioSesion UsuarioActual
 @inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavManager
 
 <h3 class="d-flex justify-content-between align-items-center">
     <span>Personas Registradas</span>
     @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
     {
-        <button class="btn btn-danger" @onclick= "() => AgregarPersona()">Agregar Persona</button>
+        <button class="btn btn-success" @onclick="() => AgregarPersona()">Agregar Persona</button>
     }
 </h3>
 
@@ -30,7 +31,7 @@ else
                 <th>Email</th>
                 <th>Teléfono</th>
                 <th>Permisos</th>
-                <th>Acción</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -58,16 +59,17 @@ else
                         }
                     </td>
                     <td>
-                        
                         @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id))
-                           {  
-                            <button class="btn btn-danger" @onclick= "() => ConfirmarReseteo(persona.Id)">Editar</button>
-                                <DialogoConfirmacion @ref=dialogo Mensaje="Editar"
-                                OnConfirmado="Resetear" />
-                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarPersona(persona.Id)">Eliminar</button>
-                           }
-                        @*If de permisos*@
-
+                        {
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-primary btn-sm" @onclick="() => EditarPersona(persona.Id)">
+                                    Editar
+                                </button>
+                                <button class="btn btn-danger btn-sm" @onclick="() => ConfirmarEliminacion(persona.Id)">
+                                    Eliminar
+                                </button>
+                            </div>
+                        }
                     </td>
                 </tr>
             }
@@ -75,34 +77,63 @@ else
     </table>
 }
 
+<!-- Diálogo de confirmación para eliminación -->
+<DialogoConfirmacion @ref="dialogoEliminacion" 
+                     Mensaje="¿Está seguro que desea eliminar esta persona? Esta acción no se puede deshacer."
+                     OnConfirmado="EliminarPersonaConfirmado" />
+
 @code {
     private List<Persona> personas = new();
-    private Persona nuevaPersona = new();
-
-    //Pruebas qcyo
-    private int currentCount = 0;
-    DialogoConfirmacion dialogo = null!;
-    private void ConfirmarReseteo(int Id)
-    {
-        dialogo.Mostrar(Id);
-    }
-    private void Resetear()
-    {
-        currentCount = 0;
-    }
+    private DialogoConfirmacion dialogoEliminacion = null!;
+    private int personaIdAEliminar = 0;
 
     protected override void OnInitialized()
     {
+        CargarPersonas();
+    }
+
+    private void CargarPersonas()
+    {
         personas = ListarPersonasUseCase.Ejecutar().ToList();
     }
+
     private void AgregarPersona()
     {
-        Console.WriteLine($"Agregar persona");
+        // Navegar al formulario para agregar nueva persona
+        NavManager.NavigateTo("/admin/usuarios/agregar");
     }
-    private void EliminarPersona(int id)
+
+    private void EditarPersona(int personaId)
     {
-        Console.WriteLine($"ELIMINAR persona ID {id}");
+        // Navegar al formulario para modificar persona con el ID específico
+        NavManager.NavigateTo($"/admin/usuarios/modificar/{personaId}");
+    }
+
+    private void ConfirmarEliminacion(int personaId)
+    {
+        personaIdAEliminar = personaId;
+        dialogoEliminacion.Mostrar(personaId);
+    }
+
+    private void EliminarPersonaConfirmado()
+    {
+        try
+        {
+            // Aquí deberías implementar la lógica de eliminación
+            // Ejemplo: EliminarPersonaUseCase.Ejecutar(personaIdAEliminar);
+            
+            Console.WriteLine($"ELIMINAR persona ID {personaIdAEliminar}");
+            
+            // Recargar la lista después de eliminar
+            CargarPersonas();
+            
+            // Opcional: Mostrar mensaje de éxito
+            // successMessage = "Persona eliminada correctamente";
+        }
+        catch (Exception ex)
+        {
+            // Manejar error
+            Console.WriteLine($"Error al eliminar persona: {ex.Message}");
+        }
     }
 }
-
-

@@ -30,7 +30,7 @@ namespace CentroEventos.Repositorios
             using var CentroEventosContext = new CentroEventosContext();
             return CentroEventosContext.Personas.ToList();
         }
-        public Persona? GetPersona(int id)
+        public Persona? ObtenerPersonaPorId(int id)
         {
             using var CentroEventosContext = new CentroEventosContext();
             return CentroEventosContext.Personas.Find(id);

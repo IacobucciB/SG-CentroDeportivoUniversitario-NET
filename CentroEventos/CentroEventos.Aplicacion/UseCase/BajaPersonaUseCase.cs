@@ -11,7 +11,7 @@ public class BajaPersonaUseCase(
             throw new FalloAutorizacionException("No tiene permiso para realizar esta acción.");
 
         // 2. Validar existencia de la persona
-        var persona = repositorioPersona.GetPersona(idPersona);
+        var persona = repositorioPersona.ObtenerPersonaPorId(idPersona);
         if (persona == null)
             throw new EntidadNotFoundException("La persona no existe.");
 

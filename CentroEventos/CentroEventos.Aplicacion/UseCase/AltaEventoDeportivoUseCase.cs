@@ -18,7 +18,7 @@ public class AltaEventoDeportivoUseCase(
         
 
         // 3. Validar existencia del responsable
-        var responsable = repositorioPersona.GetPersona(eventoDeportivo.ResponsableId);
+        var responsable = repositorioPersona.ObtenerPersonaPorId(eventoDeportivo.ResponsableId);
         if (responsable == null)
             throw new EntidadNotFoundException("El responsable no existe.");
 
