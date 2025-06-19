@@ -65,7 +65,7 @@ else
                             <button class="btn btn-primary btn-sm me-2" @onclick="() => EditarEvento(evento.Id)">
                                 Editar
                             </button>
-                            <button class="btn btn-danger btn-sm" @onclick="() => EliminarEvento(evento.Id)">
+                            <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/EventoEliminar?idEvento={evento.Id}"))">
                                 Eliminar
                             </button>
                             </td>
@@ -87,19 +87,10 @@ else
         eventos = ListarEventosUseCase.Ejecutar().ToList();
     }
 
-    private void CrearReserva(int eventoId)
-    {
-        
-        NavManager.NavigateTo($"/ReservaCrear");
-    }
+    
     private void EditarEvento(int eventoId)
     {
         Console.WriteLine($"Editar evento {eventoId}");
-    }
-
-    private void EliminarEvento(int eventoId)
-    {
-        Console.WriteLine($"Eliminar evento {eventoId}");
     }
 
     private void MostrarDialogoCrear()
