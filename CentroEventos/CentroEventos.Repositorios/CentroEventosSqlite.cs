@@ -8,22 +8,23 @@ public class CentroEventosSqlite
     {
         using var context = new CentroEventosContext();
 
-        // Eliminar la base de datos existente
-        context.Database.EnsureDeleted();
-
-        // Crear la base de nuevo
-        context.Database.EnsureCreated();
-
-        // Abrir la conexión y configurar PRAGMA
-        var connection = context.Database.GetDbConnection();
-        connection.Open();
-
-        using (var command = connection.CreateCommand())
+        if (context.Database.EnsureCreated())
         {
-            command.CommandText = "PRAGMA journal_mode=DELETE;";
-            command.ExecuteNonQuery();
+
+            var connection = context.Database.GetDbConnection();
+            connection.Open();
+            using (var command = connection.CreateCommand())
+            {
+                command.CommandText = "PRAGMA journal_mode=DELETE;";
+                command.ExecuteNonQuery();
+            }
+            Console.WriteLine("Se creo la base de datos");
+        }
+        else
+        {
+            Console.WriteLine("La base de datos ya existe");
         }
 
-        Console.WriteLine("Base de datos reiniciada completamente.");
     }
+
 }
