@@ -62,17 +62,23 @@ else
                             +
                         </button>
                         </td>
-                        @if(ServicioAutorizacion.EsAdmin(UsuarioActual.PersonaLogueada!.Id)){
+                        @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoModificacion)){
                             <td>
                             <button class="btn btn-primary btn-sm me-2" @onclick="@(() => NavManager.NavigateTo($"/EventoCrear?idEvento={evento.Id}"))"> 
                                 Editar
                             </button>
+                            </td>
+                        }
+                         @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoBaja))
+                        {
+                            <td>
                             <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/EventoEliminar?idEvento={evento.Id}"))">
                                 Eliminar
                             </button>
                             </td>
-                        }  
-                    }
+                        }
+                        
+                    }  
                     
                 </tr>
             }
