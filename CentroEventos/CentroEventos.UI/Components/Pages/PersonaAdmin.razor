@@ -100,13 +100,13 @@ else
     private void AgregarPersona()
     {
         // Navegar al formulario para agregar nueva persona
-        NavManager.NavigateTo("/Admin/Usuarios/Agregar");
+        NavManager.NavigateTo("/AdminUsuariosAgregar");
     }
 
     private void EditarPersona(int personaId)
     {
         // Navegar al formulario para modificar persona con el ID específico
-        NavManager.NavigateTo($"/Admin/Usuarios/Modificar?idPersona={personaId}");
+        NavManager.NavigateTo($"/AdminUsuariosModificar?idPersona={personaId}");
     }
 
     private void ConfirmarEliminacion(int personaId)

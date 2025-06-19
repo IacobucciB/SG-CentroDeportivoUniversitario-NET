@@ -1,5 +1,5 @@
-@page "/Admin/Usuarios/Agregar"
-@page "/Admin/Usuarios/Modificar"
+@page "/AdminUsuariosAgregar"
+@page "/AdminUsuariosModificar"
 @inject NavigationManager NavManager
 @inject IServicioAutorizacion ServicioAutorizacion
 @inject IServicioHash Hashing
@@ -82,17 +82,15 @@
                 <div class="mb-3">
                     <label class="form-label">Permisos</label>
                     <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                        @foreach (var permiso in Enum.GetValues<Permiso>())
+                        @foreach (var permiso in TodosLosPermisos)
                         {
-                            <div class="form-check mb-2">
-                                <input class="form-check-input" 
-                                       type="checkbox" 
-                                       id="permiso_@permiso" 
-                                       @onchange="@((e) => OnPermisoChanged(permiso, (bool)e.Value!))" 
-                                       checked="@registroModel.PermisosSeleccionados.Contains(permiso)" />
-                                <label class="form-check-label" for="permiso_@permiso">
-                                    @GetPermisoDisplayName(permiso)
-                                </label>
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                    type="checkbox"
+                                    id="@permiso"
+                                    checked="@(permisosSeleccionados.Contains(permiso))"
+                                    @onchange="e => TogglePermiso(permiso, (bool)e.Value)" />
+                                <label class="form-check-label" for="@permiso">@GetPermisoDisplayName(permiso)</label>
                             </div>
                         }
                     </div>
@@ -120,18 +118,45 @@ else
     public int? IdUsuario { get; set; }
 
     private RegistroModel registroModel = new();
+    private List<Permiso> TodosLosPermisos = Enum.GetValues<Permiso>().ToList();
+    private List<Permiso> permisosSeleccionados = new();
+
     private string? errorMessage;
     private string? successMessage;
     private bool datosListos = false;
     private bool esModificacion = false;
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
-        // Determinar operación (síncrono)
-        DeterminarTipoOperacion();
-        
-        // Cargar datos (inicia async pero no esperamos aquí)
-        CargarDatos();
+        try
+        {
+            await InicializarComponente();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error de inicialización: {ex.Message}";
+            datosListos = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task InicializarComponente()
+    {
+        // Verificar que los servicios estén disponibles
+        if (UsuarioActual?.PersonaLogueada == null)
+        {
+            NavManager.NavigateTo("/login");
+            return;
+        }
+
+        await DeterminarTipoOperacion();
+        await CargarDatos();
+    }
+
+    private async Task EsperarSesionDisponible()
+    {
+        // Método ya no necesario con el nuevo patrón
+        return;
     }
 
     private async Task DeterminarTipoOperacion()
@@ -139,7 +164,14 @@ else
         var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
         var path = uri.AbsolutePath.ToLower();
 
-        esModificacion = path.Contains("/admin/usuarios/modificar");
+        esModificacion = path.Contains("/adminusuariosmodificar") || IdUsuario.HasValue;
+        
+        // Verificar si el usuario está logueado
+        if (UsuarioActual?.PersonaLogueada == null)
+        {
+            NavManager.NavigateTo("/login");
+            return;
+        }
         
         var permisoRequerido = esModificacion 
             ? Permiso.UsuarioModificacion 
@@ -159,69 +191,62 @@ else
             {
                 await CargarDatosUsuarioEspecifico();
             }
+            else if (esModificacion && !IdUsuario.HasValue)
+            {
+                // Si es modificación pero no hay ID, es un error
+                throw new Exception("No se proporcionó el ID del usuario a modificar");
+            }
             
             datosListos = true;
-            StateHasChanged();
+            StateHasChanged(); // Forzar actualización de la UI
         }
         catch (Exception ex)
         {
             errorMessage = $"Error al cargar los datos: {ex.Message}";
-            datosListos = true;
-            StateHasChanged();
+            datosListos = true; // Mostrar el error en lugar de la pantalla de carga
+            StateHasChanged(); // Forzar actualización de la UI
         }
     }
 
     private async Task CargarDatosUsuarioEspecifico()
     {
-        if (IdUsuario.HasValue)
+        if (!IdUsuario.HasValue)
         {
-            var persona = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
-            if (persona != null)
-            {
-                registroModel.Dni = persona.DNI;
-                registroModel.Nombre = persona.Nombre;
-                registroModel.Apellido = persona.Apellido;
-                registroModel.Email = persona.Email;
-                registroModel.Telefono = persona.Telefono ?? "";
-                registroModel.Password = "";
-                registroModel.ConfirmPassword = "";
-                
-                // Cargar permisos del usuario
-                await CargarPermisosUsuario(IdUsuario.Value);
-            }
-            else
-            {
-                throw new Exception("Usuario no encontrado");
-            }
+            throw new Exception("ID de usuario no válido");
         }
+
+        var persona = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
+        
+        if (persona == null)
+        {
+            throw new Exception("Usuario no encontrado");
+        }
+
+        // Cargar los datos del usuario en el modelo
+        registroModel.Dni = persona.DNI ?? "";
+        registroModel.Nombre = persona.Nombre ?? "";
+        registroModel.Apellido = persona.Apellido ?? "";
+        registroModel.Email = persona.Email ?? "";
+        registroModel.Telefono = persona.Telefono ?? "";
+        registroModel.Password = "";
+        registroModel.ConfirmPassword = "";
+        
+        // Cargar los permisos seleccionados
+        permisosSeleccionados = persona.ListaPermisos?.ToList() ?? new List<Permiso>();
     }
 
-    private async Task CargarPermisosUsuario(int idUsuario)
-    {
-        // Implementar carga de permisos según tu servicio
-        registroModel.PermisosSeleccionados.Clear();
-        foreach (var permiso in Enum.GetValues<Permiso>())
-        {
-            if (ServicioAutorizacion.PoseeElPermiso(idUsuario, permiso))
-            {
-                registroModel.PermisosSeleccionados.Add(permiso);
-            }
-        }
-        await Task.CompletedTask;
-    }
-
-    private void OnPermisoChanged(Permiso permiso, bool isChecked)
+    private void TogglePermiso(Permiso permiso, bool isChecked)
     {
         if (isChecked)
         {
-            if (!registroModel.PermisosSeleccionados.Contains(permiso))
+            if (!permisosSeleccionados.Contains(permiso))
             {
-                registroModel.PermisosSeleccionados.Add(permiso);
+                permisosSeleccionados.Add(permiso);
             }
         }
         else
         {
-            registroModel.PermisosSeleccionados.Remove(permiso);
+            permisosSeleccionados.Remove(permiso);
         }
     }
 
@@ -246,7 +271,9 @@ else
     {
         try
         {
-            // Verificar que la sesión sigue activa
+            errorMessage = null;
+            successMessage = null;
+
             if (UsuarioActual.PersonaLogueada == null)
             {
                 NavManager.NavigateTo("/login");
@@ -265,10 +292,10 @@ else
                 Nombre = registroModel.Nombre,
                 Apellido = registroModel.Apellido,
                 Email = registroModel.Email,
-                Telefono = registroModel.Telefono
+                Telefono = registroModel.Telefono,
+                ListaPermisos = permisosSeleccionados
             };
 
-            // Solo hashear la contraseña si se proporcionó una nueva
             if (!string.IsNullOrEmpty(registroModel.Password))
             {
                 persona.Contrasena = Hashing.Hashear(registroModel.Password);
@@ -293,13 +320,10 @@ else
     private async Task ProcesarAgregarUsuario(CentroEventos.Aplicacion.Persona persona)
     {
         await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
-        
-        // Asignar permisos seleccionados
-        await AsignarPermisosUsuario(persona.Id);
-        
         successMessage = "Usuario agregado correctamente";
         errorMessage = null;
-        registroModel = new RegistroModel(); // Limpiar formulario
+        registroModel = new RegistroModel();
+        permisosSeleccionados.Clear();
     }
 
     private async Task ProcesarModificarUsuario(CentroEventos.Aplicacion.Persona persona)
@@ -311,7 +335,6 @@ else
 
         persona.Id = IdUsuario.Value;
         
-        // Si no se proporcionó nueva contraseña, obtener la actual del usuario
         if (string.IsNullOrEmpty(registroModel.Password))
         {
             var usuarioExistente = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
@@ -322,32 +345,8 @@ else
         }
         
         await Task.Run(() => ModificarPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
-        
-        // Actualizar permisos
-        await AsignarPermisosUsuario(persona.Id);
-        
         successMessage = "Usuario modificado correctamente";
         errorMessage = null;
-    }
-
-    private async Task AsignarPermisosUsuario(int idUsuario)
-    {
-        // Implementar asignación de permisos según tu servicio
-        // Ejemplo:
-        /*
-        // Primero quitar todos los permisos existentes
-        foreach (var permiso in Enum.GetValues<Permiso>())
-        {
-            ServicioAutorizacion.QuitarPermiso(idUsuario, permiso);
-        }
-        
-        // Luego asignar los permisos seleccionados
-        foreach (var permiso in registroModel.PermisosSeleccionados)
-        {
-            ServicioAutorizacion.AsignarPermiso(idUsuario, permiso);
-        }
-        */
-        await Task.CompletedTask;
     }
 
     private void Cancelar()
@@ -384,6 +383,5 @@ else
         public string Telefono { get; set; } = "";
         public string Password { get; set; } = "";
         public string ConfirmPassword { get; set; } = "";
-        public HashSet<Permiso> PermisosSeleccionados { get; set; } = new();
     }
 }
