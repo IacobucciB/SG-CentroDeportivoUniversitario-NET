@@ -92,13 +92,13 @@ else
                 return;
 
             } else {
-                Console.WriteLine("El ID usuario sesión es: " + UsuarioActual.PersonaLogueada?.Id);
+                Console.WriteLine("El ID usuario sesión es: " + UsuarioActual.PersonaLogueada.Id);
 
-                registroModel.Dni = UsuarioActual.PersonaLogueada!.DNI;
+                registroModel.Dni = UsuarioActual.PersonaLogueada.DNI;
                 registroModel.Nombre = UsuarioActual.PersonaLogueada.Nombre;
                 registroModel.Apellido = UsuarioActual.PersonaLogueada.Apellido;
                 registroModel.Email = UsuarioActual.PersonaLogueada.Email;
-                // Password se deja vacío intencionalmente
+                // Password se deja vacío intencionalmente (no se muestra en el formulario xq esta hasheado)
                 
                 usuarioCargado = true;
             }

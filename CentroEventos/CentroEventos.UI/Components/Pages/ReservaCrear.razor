@@ -1,4 +1,4 @@
-@page "/ReservaCrear"
+@page "/ReservaCrear/{idEvento:int}"
 
 @rendermode InteractiveServer
 @using CentroEventos.Aplicacion
@@ -6,21 +6,21 @@
 @inject ServicioSesion UsuarioActual
 @inject IRepositorioEventoDeportivo RepositorioEvento
 @inject NavigationManager NavManager
+
 @inject ListarEventosDeportivosUseCase ListarEventosDeportivos
 
 
-<h3>Crear Nueva Reserva</h3>
+<h3>¿Está seguro de generar esta reserva?</h3>
 
 @if (!string.IsNullOrEmpty(errorMensaje))
 {
     <div class="alert alert-danger">@errorMensaje</div>
 }
 
-<EditForm Model="reserva" OnValidSubmit="HandleSubmit">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+    @* <DataAnnotationsValidator />
+    <ValidationSummary /> *@
 
-    <div class="mb-3">
+    @* <div class="mb-3">
         <label class="form-label">Evento Deportivo</label>
         <InputSelect class="form-control" @bind-Value="reserva.EventoDeportivoId">
             <option value="">-- Seleccionar Evento --</option>
@@ -29,34 +29,24 @@
                 <option value="@evento.Id">@evento.Nombre</option>
             }
         </InputSelect>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Estado de Asistencia</label>
-        <InputSelect class="form-control" @bind-Value="reserva.EstadoAsistencia">
-            @foreach (EstadoAsistencia estado in Enum.GetValues(typeof(EstadoAsistencia)))
-            {
-                <option value="@((int)estado)">@estado</option>
-            }
-        </InputSelect>
-    </div>
+    </div> *@
 
     <div class="d-flex justify-content-end">
-        <button type="submit" class="btn btn-success">Guardar Reserva</button>
+        <button type="submit" class="btn btn-success" @onclick="@HandleSubmit">Guardar Reserva</button>
         <button type="button" class="btn btn-secondary ms-2" @onclick="@Cancelar">Cancelar</button>
     </div>
-</EditForm>
 
 @code {
     private Reserva reserva = new();
     private List<EventoDeportivo> eventos = new();
     private string? errorMensaje;
-
+    [Parameter]
+    public int idEvento { get; set; }
     protected override void OnInitialized()
     {
         reserva.FechaAltaReserva = DateTime.Now; //revisar
         reserva.PersonaId = UsuarioActual.PersonaLogueada?.Id ?? 0;
-        eventos = ListarEventosDeportivos.Ejecutar();
+        reserva.EventoDeportivoId = idEvento;
     }
 
     private void HandleSubmit()
@@ -74,6 +64,6 @@
 
     private void Cancelar()
     {
-        NavManager.NavigateTo("/ReservaAdmin");
+        NavManager.NavigateTo("/EventoAdmin");
     }
 }
