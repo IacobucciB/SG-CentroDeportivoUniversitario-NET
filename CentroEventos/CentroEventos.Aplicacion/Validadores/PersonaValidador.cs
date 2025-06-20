@@ -22,6 +22,11 @@ public class PersonaValidador
         {
             mensajeError = "La contrasena no puede estar vacia.";
         }
+        if (!string.IsNullOrWhiteSpace(persona.DNI) && !persona.DNI.All(char.IsDigit))
+        {
+            mensajeError = "El DNI debe estar compuesto solo por numeros.";
+        }
+
 
         return (mensajeError == "");
     }

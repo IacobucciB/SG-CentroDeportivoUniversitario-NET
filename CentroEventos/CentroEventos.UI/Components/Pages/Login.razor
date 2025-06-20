@@ -18,20 +18,20 @@
             <div class="alert alert-danger">@errorMessage</div>
         }
 
-        <EditForm Model="@loginModel" OnValidSubmit="HandleLogin">
+        <EditForm Model="@p" OnValidSubmit="HandleLogin">
             <DataAnnotationsValidator />
             <ValidationSummary />
 
             <div class="mb-3">
                 <label for="email" class="form-label">Correo Electrónico</label>
-                <InputText id="email" class="form-control" @bind-Value="loginModel.Email" />
-                <ValidationMessage For="@(() => loginModel.Email)" />
+                <InputText id="email" class="form-control" @bind-Value="p.Email" />
+                <ValidationMessage For="@(() => p.Email)" />
             </div>
 
             <div class="mb-3">
                 <label for="password" class="form-label">Contraseña</label>
-                <InputText id="password" class="form-control" type="password" @bind-Value="loginModel.Password" />
-                <ValidationMessage For="@(() => loginModel.Password)" />
+                <InputText id="password" class="form-control" type="password" @bind-Value="p.Contrasena" />
+                <ValidationMessage For="@(() => p.Contrasena)" />
             </div>
 
             <button type="submit" class="btn btn-primary w-100">Ingresar</button>
@@ -45,7 +45,7 @@
 </div>
 
 @code {
-    private LoginModel loginModel = new();
+    Persona p = new Persona();
     private string? errorMessage;
 
     private async Task HandleLogin()
@@ -56,12 +56,12 @@
             var personas = await Task.Run(() => ListarPersonasUseCase.Ejecutar());
 
             var persona = personas.FirstOrDefault(p =>
-                p.Email.Equals(loginModel.Email, StringComparison.OrdinalIgnoreCase));
+                p.Email.Equals(p.Email, StringComparison.OrdinalIgnoreCase));
 
             if (persona != null)
             {
                 // Verificar password
-                if (Hashing.Verificar(loginModel.Password ?? "", persona.Contrasena))
+                if (Hashing.Verificar(p.Contrasena ?? "", persona.Contrasena))
                 {
                     UsuarioActual.IniciarSesion(persona);
                     Console.WriteLine("Usuario autenticado: " + persona.Email);
@@ -84,11 +84,4 @@
             errorMessage = $"Error al intentar iniciar sesión: {ex.Message}";
         }
     }
-
-     private class LoginModel
-    {
-        public string? Email { get; set; }
-        public string? Password { get; set; }
-    }
-
 }

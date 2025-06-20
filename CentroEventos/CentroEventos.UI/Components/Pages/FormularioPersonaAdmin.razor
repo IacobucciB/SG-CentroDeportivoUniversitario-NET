@@ -26,58 +26,49 @@
                 <div class="alert alert-success">@successMessage</div>
             }
 
-            <EditForm Model="@registroModel" OnValidSubmit="OnSubmit">
+            <EditForm Model="@p" OnValidSubmit="OnSubmit">
                 <DataAnnotationsValidator />
                 <ValidationSummary />
 
                 <div class="mb-3">
                     <label class="form-label">DNI</label>
-                    <InputText class="form-control" @bind-Value="registroModel.Dni" />
-                    <ValidationMessage For="@(() => registroModel.Dni)" />
+                    <InputText class="form-control" @bind-Value="p.DNI" />
+                    <ValidationMessage For="@(() => p.DNI)" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Nombre</label>
-                    <InputText class="form-control" @bind-Value="registroModel.Nombre" />
-                    <ValidationMessage For="@(() => registroModel.Nombre)" />
+                    <InputText class="form-control" @bind-Value="p.Nombre" />
+                    <ValidationMessage For="@(() => p.Nombre)" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Apellido</label>
-                    <InputText class="form-control" @bind-Value="registroModel.Apellido" />
-                    <ValidationMessage For="@(() => registroModel.Apellido)" />
+                    <InputText class="form-control" @bind-Value="p.Apellido" />
+                    <ValidationMessage For="@(() => p.Apellido)" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Correo Electrónico</label>
-                    <InputText class="form-control" @bind-Value="registroModel.Email" />
-                    <ValidationMessage For="@(() => registroModel.Email)" />
+                    <InputText class="form-control" @bind-Value="p.Email" />
+                    <ValidationMessage For="@(() => p.Email)" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">Teléfono</label>
-                    <InputText class="form-control" @bind-Value="registroModel.Telefono" />
-                    <ValidationMessage For="@(() => registroModel.Telefono)" />
+                    <InputText class="form-control" @bind-Value="p.Telefono" />
+                    <ValidationMessage For="@(() => p.Telefono)" />
                 </div>
 
                 <div class="mb-3">
                     <label class="form-label">@GetPasswordLabel()</label>
-                    <InputText type="password" class="form-control" @bind-Value="registroModel.Password" />
-                    <ValidationMessage For="@(() => registroModel.Password)" />
+                    <InputText type="password" class="form-control" @bind-Value="p.Contrasena" />
+                    <ValidationMessage For="@(() => p.Contrasena)" />
                     @if (esModificacion)
                     {
                         <small class="form-text text-muted">Deja en blanco si no deseas cambiar la contraseña</small>
                     }
                 </div>
-
-                @if (!esModificacion)
-                {
-                    <div class="mb-3">
-                        <label class="form-label">Confirmar Contraseña</label>
-                        <InputText type="password" class="form-control" @bind-Value="registroModel.ConfirmPassword" />
-                        <ValidationMessage For="@(() => registroModel.ConfirmPassword)" />
-                    </div>
-                }
 
                 <div class="mb-3">
                     <label class="form-label">Permisos</label>
@@ -89,7 +80,7 @@
                                     type="checkbox"
                                     id="@permiso"
                                     checked="@(permisosSeleccionados.Contains(permiso))"
-                                    @onchange="e => TogglePermiso(permiso, (bool)e.Value)" />
+                                    @onchange="e => TogglePermiso(permiso, (bool)(e.Value ?? false))" />
                                 <label class="form-check-label" for="@permiso">@GetPermisoDisplayName(permiso)</label>
                             </div>
                         }
@@ -117,7 +108,7 @@ else
     [SupplyParameterFromQuery(Name = "idPersona")]
     public int? IdUsuario { get; set; }
 
-    private RegistroModel registroModel = new();
+    Persona p = new Persona();
     private List<Permiso> TodosLosPermisos = Enum.GetValues<Permiso>().ToList();
     private List<Permiso> permisosSeleccionados = new();
 
@@ -151,12 +142,6 @@ else
 
         await DeterminarTipoOperacion();
         await CargarDatos();
-    }
-
-    private async Task EsperarSesionDisponible()
-    {
-        // Método ya no necesario con el nuevo patrón
-        return;
     }
 
     private async Task DeterminarTipoOperacion()
@@ -223,13 +208,12 @@ else
         }
 
         // Cargar los datos del usuario en el modelo
-        registroModel.Dni = persona.DNI ?? "";
-        registroModel.Nombre = persona.Nombre ?? "";
-        registroModel.Apellido = persona.Apellido ?? "";
-        registroModel.Email = persona.Email ?? "";
-        registroModel.Telefono = persona.Telefono ?? "";
-        registroModel.Password = "";
-        registroModel.ConfirmPassword = "";
+        p.DNI = persona.DNI ?? "";
+        p.Nombre = persona.Nombre ?? "";
+        p.Apellido = persona.Apellido ?? "";
+        p.Email = persona.Email ?? "";
+        p.Telefono = persona.Telefono ?? "";
+        p.Contrasena = "";
         
         // Cargar los permisos seleccionados
         permisosSeleccionados = persona.ListaPermisos?.ToList() ?? new List<Permiso>();
@@ -280,34 +264,18 @@ else
                 return;
             }
 
-            if (!esModificacion && registroModel.Password != registroModel.ConfirmPassword)
+            if (!string.IsNullOrEmpty(p.Contrasena))
             {
-                errorMessage = "Las contraseñas no coinciden";
-                return;
-            }
-
-            var persona = new CentroEventos.Aplicacion.Persona
-            {
-                DNI = registroModel.Dni,
-                Nombre = registroModel.Nombre,
-                Apellido = registroModel.Apellido,
-                Email = registroModel.Email,
-                Telefono = registroModel.Telefono,
-                ListaPermisos = permisosSeleccionados
-            };
-
-            if (!string.IsNullOrEmpty(registroModel.Password))
-            {
-                persona.Contrasena = Hashing.Hashear(registroModel.Password);
+                p.Contrasena = Hashing.Hashear(p.Contrasena);
             }
 
             if (esModificacion)
             {
-                await ProcesarModificarUsuario(persona);
+                await ProcesarModificarUsuario(p);
             }
             else
             {
-                await ProcesarAgregarUsuario(persona);
+                await ProcesarAgregarUsuario(p);
             }
         }
         catch (Exception ex)
@@ -315,16 +283,23 @@ else
             errorMessage = $"Error: {ex.Message}";
             successMessage = null;
         }
+        
     }
 
     private async Task ProcesarAgregarUsuario(CentroEventos.Aplicacion.Persona persona)
     {
+        try{
         await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
         successMessage = "Usuario agregado correctamente";
         errorMessage = null;
-        registroModel = new RegistroModel();
         permisosSeleccionados.Clear();
         NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al agregar el usuario: {ex.Message}";
+            successMessage = null;
+        }
     }
 
     private async Task ProcesarModificarUsuario(CentroEventos.Aplicacion.Persona persona)
@@ -336,7 +311,7 @@ else
 
         persona.Id = IdUsuario.Value;
         
-        if (string.IsNullOrEmpty(registroModel.Password))
+        if (string.IsNullOrEmpty(p.Contrasena))
         {
             var usuarioExistente = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
             if (usuarioExistente != null)
@@ -376,14 +351,4 @@ else
         return esModificacion ? "Cargando datos del usuario..." : "Preparando formulario...";
     }
 
-    private class RegistroModel
-    {
-        public string Dni { get; set; } = "";
-        public string Nombre { get; set; } = "";
-        public string Apellido { get; set; } = "";
-        public string Email { get; set; } = "";
-        public string Telefono { get; set; } = "";
-        public string Password { get; set; } = "";
-        public string ConfirmPassword { get; set; } = "";
-    }
 }

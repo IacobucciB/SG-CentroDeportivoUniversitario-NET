@@ -11,9 +11,9 @@
     <span>Reservas Registradas</span>
 </h3>
 
-@if (reservas.Count == 0)
+@if (!string.IsNullOrEmpty(errorMessage))
 {
-    <p>No hay reservas registradas.</p>
+    <div class="alert alert-danger">@errorMessage</div>
 }
 else
 {
@@ -66,13 +66,26 @@ else
 
 @code {
 
-     
+    private string? errorMessage;
+
     private List<Reserva> reservas = new();
 
     
     protected override void OnInitialized()
     {
-        reservas = ListarReservasUseCase.Ejecutar().ToList();
+        try{
+            reservas = ListarReservasUseCase.Ejecutar().ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los eventos: {ex.Message}";
+            // Aquí podrías manejar el error de manera más adecuada, como mostrar un mensaje al usuario.
+        }
+
+        if (reservas.Count == 0)
+        {
+            errorMessage = "No hay reservas registradas.";
+        }
     }
 
     private void EditarReserva(int id)

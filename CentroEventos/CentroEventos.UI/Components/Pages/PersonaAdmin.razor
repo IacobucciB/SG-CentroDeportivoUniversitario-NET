@@ -17,9 +17,9 @@
 </h3>
 
 <!-- TABLA -->
-@if (personas.Count == 0)
+@if (!string.IsNullOrEmpty(errorMessage))
 {
-    <p>No hay personas registradas.</p>
+    <div class="alert alert-danger">@errorMessage</div>
 }
 else
 {
@@ -89,6 +89,8 @@ else
 @code {
     private List<Persona> personas = new();
     private int personaIdAEliminar = 0;
+    private string? errorMessage;
+
 
     protected override void OnInitialized()
     {
@@ -97,7 +99,18 @@ else
 
     private void CargarPersonas()
     {
-        personas = ListarPersonasUseCase.Ejecutar().ToList();
+        
+        try{
+            personas = ListarPersonasUseCase.Ejecutar().ToList();        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los eventos: {ex.Message}";
+            // Aquí podrías manejar el error de manera más adecuada, como mostrar un mensaje al usuario.
+        }
+        if(personas.Count == 0)
+        {
+            errorMessage = "No hay personas registrados.";
+        }
     }
 
     private void AgregarPersona()

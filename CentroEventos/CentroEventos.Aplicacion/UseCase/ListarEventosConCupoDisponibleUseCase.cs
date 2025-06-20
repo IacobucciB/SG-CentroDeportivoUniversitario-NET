@@ -4,7 +4,7 @@ public class ListarEventosConCupoDisponibleUseCase(
     IRepositorioEventoDeportivo repositorioEventoDeportivo,
     IRepositorioReserva repositorioReserva)
 {
-    public List<EventoDeportivo> Ejecutar(int idUsuario)
+    public List<EventoDeportivo> Ejecutar()
     {
         // Obtener eventos deportivos cuya FechaHoraInicio sea futura
         var eventos = repositorioEventoDeportivo.ListarEventosDeportivos()

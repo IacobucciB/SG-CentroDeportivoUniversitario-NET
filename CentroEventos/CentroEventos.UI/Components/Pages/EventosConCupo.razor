@@ -1,12 +1,13 @@
 @page "/EventosConCupo"
 @inject ListarEventosConCupoDisponibleUseCase ListarEventosConCupoDisponible
+@inject ListarReservasUseCase ListarReservasUseCase
 @inject ServicioSesion UsuarioActual
 
 <h3>Eventos con Cupo Disponible</h3>
 
-@if (eventosConCupo.Count == 0)
+@if (!string.IsNullOrEmpty(errorMessage))
 {
-    <div class="alert alert-info">No hay eventos con cupo disponible.</div>
+    <div class="alert alert-danger">@errorMessage</div>
 }
 else
 {
@@ -40,18 +41,26 @@ else
 @code {
     private List<EventoDeportivo> eventosConCupo = new();
     private Dictionary<int, int> reservasPorEvento = new();
-
+    private string? errorMessage;
     protected override void OnInitialized()
     {
-        var idUsuario = UsuarioActual.PersonaLogueada?.Id ?? 0;
-        eventosConCupo = ListarEventosConCupoDisponible.Ejecutar(idUsuario);
+        try{
+            eventosConCupo = ListarEventosConCupoDisponible.Ejecutar();
 
-        // Extra: si querés mostrar los lugares disponibles:
-        foreach (var evento in eventosConCupo)
-        {
-            var reservas = evento.CupoMaximo - evento.CupoMaximo; // default 0
-            reservasPorEvento[evento.Id] = reservas;
+            foreach (var evento in eventosConCupo)
+            {
+                var reservas = ListarReservasUseCase.Ejecutar().Count(r => r.EventoDeportivoId == evento.Id);
+                reservasPorEvento[evento.Id] = reservas;
+            }
         }
-        
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los eventos con cupo: {ex.Message}";
+            // Aquí podrías manejar el error de manera más adecuada, como mostrar un mensaje al usuario.
+        }
+        if(reservasPorEvento.Count == 0)
+        {
+            errorMessage = "No hay eventos con cupo disponible.";
+        }
     }
 }

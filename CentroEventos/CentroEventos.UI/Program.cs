@@ -25,6 +25,7 @@ builder.Services.AddTransient<ModificarReservaUseCase>();
 builder.Services.AddTransient<ListarReservasUseCase>();
 builder.Services.AddTransient<ListarAsistenciaAEventoUseCase>();
 builder.Services.AddTransient<ObtenerReservaPorIdUseCase>();
+builder.Services.AddTransient<ListarAsistenciaAEventoUseCase>();
 
 // Evento Deportivo
 builder.Services.AddTransient<AltaEventoDeportivoUseCase>();
@@ -33,6 +34,7 @@ builder.Services.AddTransient<ModificarEventoDeportivoUseCase>();
 builder.Services.AddTransient<ListarEventosDeportivosUseCase>();
 builder.Services.AddTransient<ObtenerEventoDeportivoPorIdUseCase>();
 builder.Services.AddTransient<ListarEventosConCupoDisponibleUseCase>();
+
 
 // Validadores
 builder.Services.AddTransient<PersonaValidador>();
