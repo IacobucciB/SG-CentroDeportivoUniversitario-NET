@@ -63,7 +63,7 @@ else
                         @if (UsuarioActual.PersonaLogueada != null && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioModificacion))
                          {
                            
-                                <button class="btn btn-primary btn-sm" @onclick="() => EditarPersona(persona.Id)">
+                                <button class="btn btn-primary btn-sm btn me-2" @onclick="() => EditarPersona(persona.Id)">
                                     Editar
                                 </button>
                            }   
@@ -71,7 +71,6 @@ else
                         {  
                             
                             <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/PersonaEliminar?idPersona={persona.Id}"))">
-                                
                                     Eliminar
                             </button>
                             
@@ -85,14 +84,10 @@ else
     </table>
 }
 
-<!-- Diálogo de confirmación para eliminación -->
-<DialogoConfirmacion @ref="dialogoEliminacion" 
-                     Mensaje="¿Está seguro que desea eliminar esta persona? Esta acción no se puede deshacer."
-                     OnConfirmado="EliminarPersonaConfirmado" />
+
 
 @code {
     private List<Persona> personas = new();
-    private DialogoConfirmacion dialogoEliminacion = null!;
     private int personaIdAEliminar = 0;
 
     protected override void OnInitialized()
@@ -117,11 +112,6 @@ else
         NavManager.NavigateTo($"/AdminUsuariosModificar?idPersona={personaId}");
     }
 
-    private void ConfirmarEliminacion(int personaId)
-    {
-        personaIdAEliminar = personaId;
-        dialogoEliminacion.Mostrar(personaId);
-    }
 
     private void EliminarPersonaConfirmado()
     {
