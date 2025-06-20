@@ -286,14 +286,15 @@ else
         
     }
 
-    private async Task ProcesarAgregarUsuario(CentroEventos.Aplicacion.Persona persona)
+    private async Task ProcesarAgregarUsuario(Persona persona)
     {
-        try{
-        await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
-        successMessage = "Usuario agregado correctamente";
-        errorMessage = null;
-        permisosSeleccionados.Clear();
-        NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
+        try
+        {
+            persona.ListaPermisos = permisosSeleccionados;
+            await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
+            successMessage = "Usuario agregado correctamente";
+            errorMessage = null;
+            NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
         }
         catch (Exception ex)
         {
@@ -302,7 +303,7 @@ else
         }
     }
 
-    private async Task ProcesarModificarUsuario(CentroEventos.Aplicacion.Persona persona)
+    private async Task ProcesarModificarUsuario(Persona persona)
     {
         if (!IdUsuario.HasValue)
         {
@@ -313,17 +314,25 @@ else
         
         if (string.IsNullOrEmpty(p.Contrasena))
         {
+            
             var usuarioExistente = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
             if (usuarioExistente != null)
             {
                 persona.Contrasena = usuarioExistente.Contrasena;
             }
         }
-        
+        try {
+            persona.ListaPermisos = permisosSeleccionados;
         await Task.Run(() => ModificarPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
         successMessage = "Usuario modificado correctamente";
         errorMessage = null;
         NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al modificar el usuario: {ex.Message}";
+            successMessage = null;
+        }
     }
 
     private void Cancelar()

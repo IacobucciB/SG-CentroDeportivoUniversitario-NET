@@ -55,8 +55,8 @@
             // Esperar a que devuelva la lista de personas asi no se bloquea
             var personas = await Task.Run(() => ListarPersonasUseCase.Ejecutar());
 
-            var persona = personas.FirstOrDefault(p =>
-                p.Email.Equals(p.Email, StringComparison.OrdinalIgnoreCase));
+            var persona = personas.FirstOrDefault(pipo =>
+                pipo.Email.Equals(p.Email, StringComparison.OrdinalIgnoreCase));
 
             if (persona != null)
             {
@@ -71,6 +71,8 @@
                 else
                 {
                     Console.WriteLine("Problema al autenticar el hash");
+                    errorMessage = "Contraseña incorrecta.";
+                
                 }
                 
             }
