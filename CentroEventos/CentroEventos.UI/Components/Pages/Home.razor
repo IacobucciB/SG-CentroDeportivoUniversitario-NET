@@ -1,0 +1,38 @@
+﻿@page "/"
+@implements IDisposable
+@inject ServicioSesion UsuarioActual
+@rendermode InteractiveServer
+
+
+@if (UsuarioActual.PersonaLogueada is null)
+{
+    <div class="d-flex justify-content-end">
+        <NavLink class="btn btn-primary mt-3 me-4" href="/login">Iniciar Sesión</NavLink>
+    </div>
+    <div class="text-center mt-5"></div>
+    <h1 class="display-4">¡Bienvenido al Centro Deportivo!</h1>
+}
+else
+{
+    <div class="text-center mt-5"></div>
+    <h1 class="display-4">¡Bienvenido @UsuarioActual.PersonaLogueada.Nombre!</h1>
+}
+
+<p class="lead">Gestioná tus reservas, actividades y usuarios desde una sola plataforma.</p>
+
+@code {
+    protected override void OnInitialized()
+    {
+        UsuarioActual.OnSesionCambiada += Refrescar;
+    }
+
+    void Refrescar()
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        UsuarioActual.OnSesionCambiada -= Refrescar;
+    }
+}

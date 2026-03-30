@@ -1,0 +1,120 @@
+@page "/EventoAdmin"
+@rendermode InteractiveServer
+@using CentroEventos.Aplicacion
+@inject ListarEventosDeportivosUseCase ListarEventosUseCase
+@inject ServicioSesion UsuarioActual
+@inject IRepositorioEventoDeportivo RepositorioEvento
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavManager
+
+
+<h3 class="d-flex justify-content-between align-items-center">
+    <span>Eventos Registrados</span>
+    @if ((UsuarioActual.PersonaLogueada?.Id != null) && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id , Permiso.EventoAlta))
+    {
+        <button class="btn btn-primary btn-sm me-2" @onclick="@(() => NavManager.NavigateTo($"/EventoCrear?idEvento={-1}"))"> 
+        
+            <i class="bi bi-plus-circle me-1"></i> + Crear Evento
+        </button>
+    }
+</h3>
+
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Fecha y Hora</th>
+                <th>Duración (hs)</th>
+                <th>Cupo Máximo</th>
+                <th>Responsable ID</th>
+                @if (UsuarioActual.PersonaLogueada?.Id != null)
+                {
+                    <th>Reservar?</th>
+                    <th>Acciones</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var evento in eventos)
+            {
+                <tr>
+                    <td>@evento.Id</td>
+                    <td>@evento.Nombre</td>
+                    <td>@evento.Descripcion</td>
+                    <td>@evento.FechaHoraInicio.ToString("dd/MM/yyyy HH:mm")</td>
+                    <td>@evento.DuracionHoras</td>
+                    <td>@evento.CupoMaximo</td>
+                    <td>@evento.ResponsableId</td>
+                    
+                    @if (UsuarioActual.PersonaLogueada?.Id != null)
+                    {
+                        <td>
+                        <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/ReservaCrear?idEvento={evento.Id}"))">
+                            +
+                        </button>
+                        </td>
+                        @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoModificacion)){
+                            <td>
+                            <button class="btn btn-primary btn-sm me-2" @onclick="@(() => NavManager.NavigateTo($"/EventoCrear?idEvento={evento.Id}"))"> 
+                                Editar
+                            </button>
+                            </td>
+                        }
+                         @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoBaja))
+                        {
+                            <td>
+                            <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/EventoEliminar?idEvento={evento.Id}"))">
+                                Eliminar
+                            </button>
+                            </td>
+                        }
+                        
+                    }  
+                    
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private string? errorMessage;
+    private List<EventoDeportivo> eventos = new();
+
+    protected override void OnInitialized()
+    {
+        try{
+
+            eventos = ListarEventosUseCase.Ejecutar().ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los eventos: {ex.Message}";
+            // Aquí podrías manejar el error de manera más adecuada, como mostrar un mensaje al usuario.
+        }
+        if(eventos.Count == 0)
+        {
+            errorMessage = "No hay eventos registrados.";
+        }
+    }
+
+    
+    private void EditarEvento(int eventoId)
+    {
+        Console.WriteLine($"Editar evento {eventoId}");
+    }
+
+    private void MostrarDialogoCrear()
+    {
+        NavManager.NavigateTo("/EventoCrear");
+    }
+}

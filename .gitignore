@@ -1,0 +1,3 @@
+# Ignora carpetas obj y bin en cualquier parte del proyecto
+**/[Oo]bj/
+**/[Bb]in/

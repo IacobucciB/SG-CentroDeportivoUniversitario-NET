@@ -1,0 +1,150 @@
+@page "/PersonaAdmin"
+@rendermode InteractiveServer
+@using CentroEventos.Aplicacion;
+@using CentroEventos.UI.Components;
+@inject ListarPersonasUseCase ListarPersonasUseCase
+@inject ServicioSesion UsuarioActual
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject NavigationManager NavManager
+
+
+<h3 class="d-flex justify-content-between align-items-center">
+    <span>Personas Registradas</span>
+    @if (UsuarioActual.PersonaLogueada != null && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioAlta))
+    {
+        <button class="btn btn-success" @onclick="() => AgregarPersona()">Agregar Persona</button>
+    }
+</h3>
+
+<!-- TABLA -->
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else
+{
+    <table class="table table-striped table-bordered mt-3">
+        <thead class="table-dark">
+            <tr>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Apellido</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Permisos</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var persona in personas)
+            {
+                <tr>
+                    <td>@persona.DNI</td>
+                    <td>@persona.Nombre</td>
+                    <td>@persona.Apellido</td>
+                    <td>@persona.Email</td>
+                    <td>@persona.Telefono</td>
+                    <td>
+                        @if (persona.ListaPermisos?.Count > 0)
+                        {
+                            <ul class="mb-0">
+                                @foreach (var permiso in persona.ListaPermisos)
+                                {
+                                    <li>@permiso</li>
+                                }
+                            </ul>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Sin permisos</span>
+                        }
+                    </td>
+                    <td>
+                        @if (UsuarioActual.PersonaLogueada != null && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioModificacion))
+                         {
+                           
+                                <button class="btn btn-primary btn-sm btn me-2" @onclick="() => EditarPersona(persona.Id)">
+                                    Editar
+                                </button>
+                           }   
+                         @if(UsuarioActual.PersonaLogueada != null && ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, Permiso.UsuarioBaja))
+                        {  
+                            
+                            <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/PersonaEliminar?idPersona={persona.Id}"))">
+                                    Eliminar
+                            </button>
+                            
+                         }  
+                         
+                    
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+
+@code {
+    private List<Persona> personas = new();
+    private int personaIdAEliminar = 0;
+    private string? errorMessage;
+
+
+    protected override void OnInitialized()
+    {
+        CargarPersonas();
+    }
+
+    private void CargarPersonas()
+    {
+        
+        try{
+            personas = ListarPersonasUseCase.Ejecutar().ToList();        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los eventos: {ex.Message}";
+            // Aquí podrías manejar el error de manera más adecuada, como mostrar un mensaje al usuario.
+        }
+        if(personas.Count == 0)
+        {
+            errorMessage = "No hay personas registrados.";
+        }
+    }
+
+    private void AgregarPersona()
+    {
+        // Navegar al formulario para agregar nueva persona
+        NavManager.NavigateTo("/AdminUsuariosAgregar");
+    }
+
+    private void EditarPersona(int personaId)
+    {
+        // Navegar al formulario para modificar persona con el ID específico
+        NavManager.NavigateTo($"/AdminUsuariosModificar?idPersona={personaId}");
+    }
+
+
+    private void EliminarPersonaConfirmado()
+    {
+        try
+        {
+            // Aquí deberías implementar la lógica de eliminación
+            // Ejemplo: EliminarPersonaUseCase.Ejecutar(personaIdAEliminar);
+            
+            Console.WriteLine($"ELIMINAR persona ID {personaIdAEliminar}");
+            
+            // Recargar la lista después de eliminar
+            CargarPersonas();
+            
+            // Opcional: Mostrar mensaje de éxito
+            // successMessage = "Persona eliminada correctamente";
+        }
+        catch (Exception ex)
+        {
+            // Manejar error
+            Console.WriteLine($"Error al eliminar persona: {ex.Message}");
+        }
+    }
+}

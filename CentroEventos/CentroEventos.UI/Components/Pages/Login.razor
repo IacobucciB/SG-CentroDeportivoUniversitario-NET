@@ -1,0 +1,89 @@
+@page "/login"
+@inject ServicioSesion UsuarioActual
+@inject IServicioHash Hashing
+@inject NavigationManager NavManager
+@inject IServicioAutorizacion ServicioAutorizacion;
+@inject ListarPersonasUseCase ListarPersonasUseCase
+
+@rendermode InteractiveServer
+
+<PageTitle>SGE - Iniciar Sesión</PageTitle>
+
+<div class="d-flex justify-content-center">
+    <div style="width: 400px;">
+        <h3 class="text-center mt-4">Iniciar Sesión</h3>
+
+        @if (!string.IsNullOrEmpty(errorMessage))
+        {
+            <div class="alert alert-danger">@errorMessage</div>
+        }
+
+        <EditForm Model="@p" OnValidSubmit="HandleLogin">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico</label>
+                <InputText id="email" class="form-control" @bind-Value="p.Email" />
+                <ValidationMessage For="@(() => p.Email)" />
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña</label>
+                <InputText id="password" class="form-control" type="password" @bind-Value="p.Contrasena" />
+                <ValidationMessage For="@(() => p.Contrasena)" />
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Ingresar</button>
+
+            <div class="text-center mt-3">
+                <span>¿No tenés una cuenta?</span>
+                <NavLink class="btn btn-link" href="/Registro">Registrarse</NavLink>
+            </div>
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    Persona p = new Persona();
+    private string? errorMessage;
+
+    private async Task HandleLogin()
+    {
+        try
+        {
+            // Esperar a que devuelva la lista de personas asi no se bloquea
+            var personas = await Task.Run(() => ListarPersonasUseCase.Ejecutar());
+
+            var persona = personas.FirstOrDefault(pipo =>
+                pipo.Email.Equals(p.Email, StringComparison.OrdinalIgnoreCase));
+
+            if (persona != null)
+            {
+                // Verificar password
+                if (Hashing.Verificar(p.Contrasena ?? "", persona.Contrasena))
+                {
+                    UsuarioActual.IniciarSesion(persona);
+                    Console.WriteLine("Usuario autenticado: " + persona.Email);
+                
+                    NavManager.NavigateTo("/");
+                }
+                else
+                {
+                    Console.WriteLine("Problema al autenticar el hash");
+                    errorMessage = "Contraseña incorrecta.";
+                
+                }
+                
+            }
+            else
+            {
+                errorMessage = "Credenciales inválidas.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al intentar iniciar sesión: {ex.Message}";
+        }
+    }
+}

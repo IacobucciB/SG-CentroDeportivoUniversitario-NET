@@ -1,0 +1,97 @@
+@page "/reservaAdmin"
+@using CentroEventos.Aplicacion;
+@rendermode InteractiveServer
+@inject ListarReservasUseCase ListarReservasUseCase
+@inject ServicioSesion UsuarioActual
+@inject IServicioAutorizacion ServicioAutorizacion   
+
+@inject NavigationManager NavManager                    
+
+<h3 class="d-flex justify-content-between align-items-center">
+    <span>Reservas Registradas</span>
+</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else
+{
+    <table class="table table-striped table-bordered">
+        <thead class="table-dark">
+            <tr>
+               @* <th>ID</th> *@
+                <th>Persona ID</th>
+                <th>Evento ID</th>
+                <th>Fecha de Reserva</th>
+                <th>Estado</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reserva in reservas)
+            {
+                <tr>
+                   @* <td>@reserva.Id</td> *@
+                    <td>@reserva.PersonaId</td>
+                    <td>@reserva.EventoDeportivoId</td>
+                    <td>@reserva.FechaAltaReserva.ToString("dd/MM/yyyy")</td>
+                    <td>@reserva.EstadoAsistencia</td>
+                    <td>
+                    @if (UsuarioActual.PersonaLogueada?.Id != null)
+                    {
+                        
+                         @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoModificacion)){
+                            
+                            <button class="btn btn-primary btn-sm me-2" @onclick="@(() => NavManager.NavigateTo($"/ReservaEditar?idReserva={reserva.Id}"))">
+                                Editar
+                            </button>
+                            
+                        }
+                         @if(ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada!.Id, Permiso.EventoBaja)){  
+                        
+                            <button class="btn btn-primary btn-sm" @onclick="@(() => NavManager.NavigateTo($"/ReservaEliminar?idReserva={reserva.Id}"))">
+                                Eliminar
+                            </button>
+                            
+                         }
+                         
+                    }
+                 </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private string? errorMessage;
+
+    private List<Reserva> reservas = new();
+
+    
+    protected override void OnInitialized()
+    {
+        try{
+            reservas = ListarReservasUseCase.Ejecutar().ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los eventos: {ex.Message}";
+            // Aquí podrías manejar el error de manera más adecuada, como mostrar un mensaje al usuario.
+        }
+
+        if (reservas.Count == 0)
+        {
+            errorMessage = "No hay reservas registradas.";
+        }
+    }
+
+    private void EditarReserva(int id)
+    {
+        // En el futuro: redirigir o abrir modal de edición
+      //  Console.WriteLine($"EDITAR reserva ID {id}");
+    }
+
+}

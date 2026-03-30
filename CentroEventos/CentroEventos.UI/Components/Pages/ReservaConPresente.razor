@@ -1,0 +1,53 @@
+@page "/ReservaConPresente"
+@inject ListarAsistenciaAEventoUseCase ListarAsistenciaAEvento
+@inject ServicioSesion UsuarioActual
+
+<h3>Reservas con Presente</h3>
+
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else
+{
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Id</th>
+                <th>Persona Asistente</th>
+                <th>Evento Id</th>
+                <th>Fecha de reserva</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var e in asistencias)
+            {
+                <tr>
+                    <td>@e.Id</td>
+                    <td>@e.PersonaId</td>
+                    <td>@e.EventoDeportivoId</td>
+                    <td>@e.FechaAltaReserva.ToString("dd/MM/yyyy HH:mm")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Reserva> asistencias = new();
+    private string? errorMessage;
+    protected override void OnInitialized()
+    {
+        try
+        {
+            asistencias = ListarAsistenciaAEvento.Ejecutar();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar las reservas: {ex.Message}";
+            // Aquí podrías manejar el error de manera más adecuada, como mostrar un mensaje al usuario.
+        }
+
+        
+    }
+}

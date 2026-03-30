@@ -1,0 +1,363 @@
+@page "/AdminUsuariosAgregar"
+@page "/AdminUsuariosModificar"
+@inject NavigationManager NavManager
+@inject IServicioAutorizacion ServicioAutorizacion
+@inject IServicioHash Hashing
+@inject ServicioSesion UsuarioActual
+@inject AltaPersonaUseCase AltaPersonaUseCase
+@inject ModificarPersonaUseCase ModificarPersonaUseCase
+@inject ObtenerPersonaPorIdUseCase ObtenerPersonaPorIdUseCase
+@rendermode InteractiveServer
+
+<PageTitle>SGE - @GetPageTitle()</PageTitle>
+
+@if (datosListos)
+{
+    <div class="d-flex justify-content-center">
+        <div style="width: 400px;">
+            <h3 class="text-center mt-4">@GetPageTitle()</h3>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger">@errorMessage</div>
+            }
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success">@successMessage</div>
+            }
+
+            <EditForm Model="@p" OnValidSubmit="OnSubmit">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
+
+                <div class="mb-3">
+                    <label class="form-label">DNI</label>
+                    <InputText class="form-control" @bind-Value="p.DNI" />
+                    <ValidationMessage For="@(() => p.DNI)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Nombre</label>
+                    <InputText class="form-control" @bind-Value="p.Nombre" />
+                    <ValidationMessage For="@(() => p.Nombre)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Apellido</label>
+                    <InputText class="form-control" @bind-Value="p.Apellido" />
+                    <ValidationMessage For="@(() => p.Apellido)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Correo Electrónico</label>
+                    <InputText class="form-control" @bind-Value="p.Email" />
+                    <ValidationMessage For="@(() => p.Email)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Teléfono</label>
+                    <InputText class="form-control" @bind-Value="p.Telefono" />
+                    <ValidationMessage For="@(() => p.Telefono)" />
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">@GetPasswordLabel()</label>
+                    <InputText type="password" class="form-control" @bind-Value="p.Contrasena" />
+                    <ValidationMessage For="@(() => p.Contrasena)" />
+                    @if (esModificacion)
+                    {
+                        <small class="form-text text-muted">Deja en blanco si no deseas cambiar la contraseña</small>
+                    }
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Permisos</label>
+                    <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
+                        @foreach (var permiso in TodosLosPermisos)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input"
+                                    type="checkbox"
+                                    id="@permiso"
+                                    checked="@(permisosSeleccionados.Contains(permiso))"
+                                    @onchange="e => TogglePermiso(permiso, (bool)(e.Value ?? false))" />
+                                <label class="form-check-label" for="@permiso">@GetPermisoDisplayName(permiso)</label>
+                            </div>
+                        }
+                    </div>
+                    <small class="form-text text-muted">
+                        Selecciona los permisos que tendrá el usuario
+                    </small>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">@GetButtonText()</button>
+            </EditForm>
+
+            <button type="button" class="btn btn-secondary w-100 mt-2" @onclick="Cancelar">Cancelar</button>
+        </div>
+    </div>
+}
+else
+{
+    <div class="text-center mt-5">
+        <p>@GetLoadingMessage()</p>
+    </div>
+}
+
+@code {
+    [SupplyParameterFromQuery(Name = "idPersona")]
+    public int? IdUsuario { get; set; }
+
+    Persona p = new Persona();
+    private List<Permiso> TodosLosPermisos = Enum.GetValues<Permiso>().ToList();
+    private List<Permiso> permisosSeleccionados = new();
+
+    private string? errorMessage;
+    private string? successMessage;
+    private bool datosListos = false;
+    private bool esModificacion = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            await InicializarComponente();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error de inicialización: {ex.Message}";
+            datosListos = true;
+            StateHasChanged();
+        }
+    }
+
+    private async Task InicializarComponente()
+    {
+        // Verificar que los servicios estén disponibles
+        if (UsuarioActual?.PersonaLogueada == null)
+        {
+            NavManager.NavigateTo("/login");
+            return;
+        }
+
+        await DeterminarTipoOperacion();
+        await CargarDatos();
+    }
+
+    private async Task DeterminarTipoOperacion()
+    {
+        var uri = NavManager.ToAbsoluteUri(NavManager.Uri);
+        var path = uri.AbsolutePath.ToLower();
+
+        esModificacion = path.Contains("/adminusuariosmodificar") || IdUsuario.HasValue;
+        
+        // Verificar si el usuario está logueado
+        if (UsuarioActual?.PersonaLogueada == null)
+        {
+            NavManager.NavigateTo("/login");
+            return;
+        }
+        
+        var permisoRequerido = esModificacion 
+            ? Permiso.UsuarioModificacion 
+            : Permiso.UsuarioAlta;
+            
+        if (!ServicioAutorizacion.PoseeElPermiso(UsuarioActual.PersonaLogueada.Id, permisoRequerido))
+        {
+            NavManager.NavigateTo("/");
+        }
+    }
+
+    private async Task CargarDatos()
+    {
+        try
+        {
+            if (esModificacion && IdUsuario.HasValue)
+            {
+                await CargarDatosUsuarioEspecifico();
+            }
+            else if (esModificacion && !IdUsuario.HasValue)
+            {
+                // Si es modificación pero no hay ID, es un error
+                throw new Exception("No se proporcionó el ID del usuario a modificar");
+            }
+            
+            datosListos = true;
+            StateHasChanged(); // Forzar actualización de la UI
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los datos: {ex.Message}";
+            datosListos = true; // Mostrar el error en lugar de la pantalla de carga
+            StateHasChanged(); // Forzar actualización de la UI
+        }
+    }
+
+    private async Task CargarDatosUsuarioEspecifico()
+    {
+        if (!IdUsuario.HasValue)
+        {
+            throw new Exception("ID de usuario no válido");
+        }
+
+        var persona = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
+        
+        if (persona == null)
+        {
+            throw new Exception("Usuario no encontrado");
+        }
+
+        // Cargar los datos del usuario en el modelo
+        p.DNI = persona.DNI ?? "";
+        p.Nombre = persona.Nombre ?? "";
+        p.Apellido = persona.Apellido ?? "";
+        p.Email = persona.Email ?? "";
+        p.Telefono = persona.Telefono ?? "";
+        p.Contrasena = "";
+        
+        // Cargar los permisos seleccionados
+        permisosSeleccionados = persona.ListaPermisos?.ToList() ?? new List<Permiso>();
+    }
+
+    private void TogglePermiso(Permiso permiso, bool isChecked)
+    {
+        if (isChecked)
+        {
+            if (!permisosSeleccionados.Contains(permiso))
+            {
+                permisosSeleccionados.Add(permiso);
+            }
+        }
+        else
+        {
+            permisosSeleccionados.Remove(permiso);
+        }
+    }
+
+    private string GetPermisoDisplayName(Permiso permiso)
+    {
+        return permiso switch
+        {
+            Permiso.EventoAlta => "Crear Eventos",
+            Permiso.EventoModificacion => "Modificar Eventos",
+            Permiso.EventoBaja => "Eliminar Eventos",
+            Permiso.ReservaAlta => "Crear Reservas",
+            Permiso.ReservaModificacion => "Modificar Reservas",
+            Permiso.ReservaBaja => "Eliminar Reservas",
+            Permiso.UsuarioAlta => "Crear Usuarios",
+            Permiso.UsuarioModificacion => "Modificar Usuarios",
+            Permiso.UsuarioBaja => "Eliminar Usuarios",
+            _ => permiso.ToString()
+        };
+    }
+
+    private async Task OnSubmit()
+    {
+        try
+        {
+            errorMessage = null;
+            successMessage = null;
+
+            if (UsuarioActual.PersonaLogueada == null)
+            {
+                NavManager.NavigateTo("/login");
+                return;
+            }
+
+            if (!string.IsNullOrEmpty(p.Contrasena))
+            {
+                p.Contrasena = Hashing.Hashear(p.Contrasena);
+            }
+
+            if (esModificacion)
+            {
+                await ProcesarModificarUsuario(p);
+            }
+            else
+            {
+                await ProcesarAgregarUsuario(p);
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error: {ex.Message}";
+            successMessage = null;
+        }
+        
+    }
+
+    private async Task ProcesarAgregarUsuario(Persona persona)
+    {
+        try
+        {
+            persona.ListaPermisos = permisosSeleccionados;
+            await Task.Run(() => AltaPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
+            successMessage = "Usuario agregado correctamente";
+            errorMessage = null;
+            NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al agregar el usuario: {ex.Message}";
+            successMessage = null;
+        }
+    }
+
+    private async Task ProcesarModificarUsuario(Persona persona)
+    {
+        if (!IdUsuario.HasValue)
+        {
+            throw new Exception("ID de usuario no válido");
+        }
+
+        persona.Id = IdUsuario.Value;
+        
+        if (string.IsNullOrEmpty(p.Contrasena))
+        {
+            
+            var usuarioExistente = await Task.Run(() => ObtenerPersonaPorIdUseCase.Ejecutar(IdUsuario.Value));
+            if (usuarioExistente != null)
+            {
+                persona.Contrasena = usuarioExistente.Contrasena;
+            }
+        }
+        try {
+            persona.ListaPermisos = permisosSeleccionados;
+        await Task.Run(() => ModificarPersonaUseCase.Ejecutar(persona, UsuarioActual.PersonaLogueada!.Id));
+        successMessage = "Usuario modificado correctamente";
+        errorMessage = null;
+        NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al modificar el usuario: {ex.Message}";
+            successMessage = null;
+        }
+    }
+
+    private void Cancelar()
+    {
+        NavManager.NavigateTo("/PersonaAdmin", forceLoad: false);
+    }
+
+    private string GetPageTitle()
+    {
+        return esModificacion ? "Modificar Usuario" : "Agregar Usuario";
+    }
+
+    private string GetPasswordLabel()
+    {
+        return esModificacion ? "Nueva Contraseña" : "Contraseña";
+    }
+
+    private string GetButtonText()
+    {
+        return esModificacion ? "Modificar Usuario" : "Agregar Usuario";
+    }
+
+    private string GetLoadingMessage()
+    {
+        return esModificacion ? "Cargando datos del usuario..." : "Preparando formulario...";
+    }
+
+}

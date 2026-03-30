@@ -1,0 +1,54 @@
+@page "/EventoEliminar"
+
+@rendermode InteractiveServer
+@using CentroEventos.Aplicacion
+@inject BajaEventoDeportivoUseCase BajaEventoUseCase
+@inject ObtenerEventoDeportivoPorIdUseCase ObtenerEventoUseCase
+@inject ServicioSesion UsuarioActual
+@inject NavigationManager NavManager
+
+
+<h3>¿Está seguro de querer eliminar este Evento?</h3>
+
+@if (!string.IsNullOrEmpty(errorMensaje))
+{
+    <div class="alert alert-danger">@errorMensaje</div>
+}
+@if (evento != null)
+{
+        <p><strong>Nombre:</strong> @evento.Nombre</p>  
+        <p><strong>Descripción:</strong> @evento.Descripcion</p>
+        <p><strong>Fecha y Hora:</strong> @evento.FechaHoraInicio.ToString("dd/MM/yyyy HH:mm")</p>
+        <p><strong>Duración (hs):</strong> @evento.DuracionHoras</p>
+        <p><strong>Cupo Máximo:</strong> @evento.CupoMaximo</p>
+}
+    <div class="d-flex justify-content-end">
+        <button type="submit" class="btn btn-success" @onclick="@HandleSubmit">Confirmar</button> 
+        <button type="button" class="btn btn-secondary ms-2" @onclick='() => NavManager.NavigateTo("/EventoAdmin")'>Cancelar</button>
+    </div>
+
+@code {
+    private string? errorMensaje;
+    private EventoDeportivo? evento;
+    [Parameter]
+    [SupplyParameterFromQuery(Name = "idEvento")]
+    public int idEvento { get; set; }
+    protected override void OnInitialized()
+    {
+        evento = ObtenerEventoUseCase.Ejecutar(idEvento);
+    }
+
+    private void HandleSubmit()
+    {
+        try
+        {
+            BajaEventoUseCase.Ejecutar(idEvento, UsuarioActual.PersonaLogueada?.Id ?? 0);
+            NavManager.NavigateTo("/EventoAdmin");
+        }
+        catch (Exception ex)
+        {
+            errorMensaje = $"No se pudo eliminar: {ex.Message}";
+        }
+    } 
+
+}
